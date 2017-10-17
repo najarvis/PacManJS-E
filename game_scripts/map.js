@@ -49,6 +49,17 @@ function tile(position, t, r, b, l, s) {
 
 var map = {
 
+    get_tile : function(x, y, game_size, tiles) {
+        for (var i = 0; i < tiles.length; i++) {
+            item = tiles[i];
+            //console.log(item.position.elements[0], game_size, x, item.position.elements[0] / (game_size * 3 ))
+            if (item.position.elements[0] / game_size == x &&
+                item.position.elements[1] / game_size == y) {
+                return item;
+            }
+        }
+    },
+
     start : function () {
         this.canvas = document.getElementById('canvas'),
         this.canvas.width = $(window).width();
@@ -58,6 +69,7 @@ var map = {
 
         var tiles = [];
 
+        // So a decent amount of times this works great, however there is a chance it can hang because it can get in a loop.
         var s = 24;
         var w = s * 3;
         var game_size = 8;
@@ -67,21 +79,26 @@ var map = {
                 var r = Boolean(Math.floor(Math.random() * 2));
                 var b = Boolean(Math.floor(Math.random() * 2));
                 var l = Boolean(Math.floor(Math.random() * 2));
+
                 if (x == 0)                       l = false; // Sides
                 if (y == 0)                       t = false;
                 if (y == game_size-1)             b = false;
                 if (x == 0 && y == 0)           { r = true; b = true; } // Corners
                 if (x == 0 && y == game_size-1) { r = true; t = true; }
 
-                var sum = 0;
-                [t, r, b, l].forEach(function(item, index) {
-                    sum += item ? 1 : 0;    
-                });
+                if (x > 0) {
+                    l = map.get_tile(x-1, y, w, tiles).right_empty;
+                }
+                if (y > 0) {
+                    t = map.get_tile(x, y-1, w, tiles).bottom_empty;
+                }
+
+                // This sums the number of 'true' values between t, r, b, and l.
+                var sum = [t, r, b, l].reduce((a, b) => a + b, 0);
 
                 if (sum < 2) {
                     // There should be a better solution than this, because this could theoretically take O(inf) time.
-                    // This just checks to see if a tile has no outgoing connections and redoes this iteration of the loop.
-                    // This should happen to roughly 1/256 tiles.
+                    // This just checks to see if a tile has 0 or 1 outgoing connections and redoes this iteration of the loop.
                     x--;
                     continue;
                 }
