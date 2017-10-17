@@ -67,45 +67,58 @@ var map = {
 
         this.context = this.canvas.getContext("2d");
 
-        var tiles = [];
+        var tiles;
 
         // So a decent amount of times this works great, however there is a chance it can hang because it can get in a loop.
         var s = 24;
         var w = s * 3;
         var game_size = 8;
-        for (var y = 0; y < game_size; y++) {
-            for (var x = 0; x < game_size / 2; x++) {
-                var t = Boolean(Math.floor(Math.random() * 2));
-                var r = Boolean(Math.floor(Math.random() * 2));
-                var b = Boolean(Math.floor(Math.random() * 2));
-                var l = Boolean(Math.floor(Math.random() * 2));
 
-                if (x == 0)                       l = false; // Sides
-                if (y == 0)                       t = false;
-                if (y == game_size-1)             b = false;
-                if (x == 0 && y == 0)           { r = true; b = true; } // Corners
-                if (x == 0 && y == game_size-1) { r = true; t = true; }
+        while (true) {
+            tiles = [];
+            var i = 0;
+            var max_i = 100;
 
-                if (x > 0) {
-                    l = map.get_tile(x-1, y, w, tiles).right_empty;
+            for (var y = 0; y < game_size; y++) {
+                if (i > max_i) break;
+
+                for (var x = 0; x < game_size / 2; x++) {
+                    if (i > max_i) break;
+
+                    var t = Boolean(Math.floor(Math.random() * 2));
+                    var r = Boolean(Math.floor(Math.random() * 2));
+                    var b = Boolean(Math.floor(Math.random() * 2));
+                    var l = Boolean(Math.floor(Math.random() * 2));
+
+                    if (x == 0)                       l = false; // Sides
+                    if (y == 0)                       t = false;
+                    if (y == game_size-1)             b = false;
+                    if (x == 0 && y == 0)           { r = true; b = true; } // Corners
+                    if (x == 0 && y == game_size-1) { r = true; t = true; }
+
+                    if (x > 0) {
+                        l = map.get_tile(x-1, y, w, tiles).right_empty;
+                    }
+                    if (y > 0) {
+                        t = map.get_tile(x, y-1, w, tiles).bottom_empty;
+                    }
+
+                    // This sums the number of 'true' values between t, r, b, and l.
+                    var sum = [t, r, b, l].reduce((a, b) => a + b, 0);
+
+                    if (sum < 2) {
+                        // There should be a better solution than this, because this could theoretically take O(inf) time.
+                        // This just checks to see if a tile has 0 or 1 outgoing connections and redoes this iteration of the loop.
+                        x--;
+                        i++;
+                        continue;
+                    }
+
+                    tiles.push(new tile(new vector(x * w, y * w), t, r, b, l, s));
+                    tiles.push(new tile(new vector((game_size - x - 1) * w, y * w), t, l, b, r, s)); // Mirror the map left / right
                 }
-                if (y > 0) {
-                    t = map.get_tile(x, y-1, w, tiles).bottom_empty;
-                }
-
-                // This sums the number of 'true' values between t, r, b, and l.
-                var sum = [t, r, b, l].reduce((a, b) => a + b, 0);
-
-                if (sum < 2) {
-                    // There should be a better solution than this, because this could theoretically take O(inf) time.
-                    // This just checks to see if a tile has 0 or 1 outgoing connections and redoes this iteration of the loop.
-                    x--;
-                    continue;
-                }
-
-                tiles.push(new tile(new vector(x * w, y * w), t, r, b, l, s));
-                tiles.push(new tile(new vector((game_size - x - 1) * w, y * w), t, l, b, r, s)); // Mirror the map left / right
             }
+            if (i <= max_i) break;
         }
 
         for (var i = 0; i < tiles.length; i++) {
