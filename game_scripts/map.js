@@ -72,7 +72,13 @@ var map = {
                 if (y == game_size-1)             b = false;
                 if (x == 0 && y == 0)           { r = true; b = true; } // Corners
                 if (x == 0 && y == game_size-1) { r = true; t = true; }
-                if (!t && !r && !b && !l) {
+
+                var sum = 0;
+                [t, r, b, l].forEach(function(item, index) {
+                    sum += item ? 1 : 0;    
+                });
+
+                if (sum < 2) {
                     // There should be a better solution than this, because this could theoretically take O(inf) time.
                     // This just checks to see if a tile has no outgoing connections and redoes this iteration of the loop.
                     // This should happen to roughly 1/256 tiles.
