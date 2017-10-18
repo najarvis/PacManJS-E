@@ -35,4 +35,8 @@ function vector2(x, y) {
 		return other.add(this.mul(-1));
 	}
 
+	this.toString = function() {
+		return "vector2(" + String(this.x) + ", " + String(this.y) + ")";
+	}
+
 }

@@ -53,8 +53,17 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
     }
 
     // Simply changes the stored position of a tile.
-    set_position = function(position) {
+    this.set_position = function(position) {
         this.position = position;
+    }
+
+    this.equals = function(other) {
+        return (this.top_empty == other.top_empty &&
+                this.right_empty == other.right_empty &&
+                this.bottom_empty == other.bottom_empty &&
+                this.left_empty == other.left_empty &&
+                this.position.x == other.position.x &&
+                this.position.y == other.position.y);
     }
 }
 
@@ -131,49 +140,109 @@ function map() {
 
                     this.tiles.push(new tile(new vector2(x * w, y * w), t, r, b, l, s));
                     this.tiles.push(new tile(new vector2((this.game_size - x - 1) * w, y * w), t, l, b, r, s)); // Mirror the map left / right
+                }
+            }
+            if (i <= max_i) break;
+        }
 
-                    if (x == this.game_size / 2 - 1 && y > 0) {
-                        // Check to make sure each row connects to the previous
-                        var connects = false;
-                        for (var x2 = 0; x2 < this.game_size / 2; x2++) {
-                            connects = this.get_tile(x2, y, w).top_empty;
-                            if (connects) {
+        // Fill algorithm
+        var seen_tiles = [];
+        while (seen_tiles.length < this.tiles.length) {
+            var seen_tiles = [];
+            t1 = this.tiles[0];
+            var tile_queue = [t1];
+
+            while (tile_queue.length > 0) {
+                var curr = tile_queue.shift(); // Pop left
+                if (checkIn(seen_tiles, curr)) continue;
+
+                seen_tiles.push(curr);
+
+                // Push all connected tiles.
+                if (curr.right_empty) {
+                    tile_queue.push(this.get_tile((curr.position.x / w) + 1, (curr.position.y / w), w));
+                }
+                if (curr.bottom_empty) {
+                    tile_queue.push(this.get_tile((curr.position.x / w), (curr.position.y / w) + 1, w));
+                }
+                if (curr.left_empty) {
+                    tile_queue.push(this.get_tile((curr.position.x / w) - 1, (curr.position.y / w), w));
+                }
+                if (curr.top_empty) {
+                    tile_queue.push(this.get_tile((curr.position.x / w), (curr.position.y / w) - 1, w));
+                }
+            }
+            console.log(seen_tiles.length);
+ 
+            // Each time there isn't a continuous map, we connect two tiles together.
+            if (seen_tiles.length < this.tiles.length) {
+
+                // Loop over each tile and stop on the first one that isn't in the 'seen' array.
+                for (var i = 0; i < this.tiles.length; i++) {
+                    var curr = this.tiles[i];
+                    if (!checkIn(seen_tiles, curr)) {
+
+                        // If it's right side is closed off, and on it's right is a tile that is in the 'seen' array, connect the two.
+                        if (!curr.right_empty && curr.position.x < (this.game_size - 1) * w) {
+                            if (checkIn(seen_tiles, this.get_tile((curr.position.x / w) + 1, (curr.position.y / w), w))) {
+
+                                curr.right_empty = true;
+                                this.get_tile((curr.position.x / w) + 1, (curr.position.y / w), w).left_empty = true;
+
+                                // Deal with the mirror side.
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w), w).left_empty = true;
+                                this.get_tile((this.game_size - (curr.position.x / w)), (curr.position.y / w), w).right_empty = true;
                                 break;
                             }
                         }
 
-                        if (!connects) {
-                            xf = randInt(0, this.game_size / 2 - 1);
-                            this.get_tile(xf, y, w).top_empty = true;
-                            this.get_tile(xf, y-1, w).bottom_empty = true;
-                            this.get_tile((this.game_size - xf - 1), y, w).top_empty = true;
-                            this.get_tile((this.game_size - xf - 1), y-1, w).bottom_empty = true;
-                        }
+                        // If it's bottom side is closed off, and on it's bottom is a tile that is in the 'seen' array, connect the two.
+                        if (!curr.bottom_empty && curr.position.y < (this.game_size - 1) * w) {
+                            if (checkIn(seen_tiles, this.get_tile((curr.position.x / w), (curr.position.y / w) + 1, w))) {
 
-                    }
+                                curr.bottom_empty = true;
+                                this.get_tile((curr.position.x / w), (curr.position.y / w) + 1, w).top_empty = true;
 
-                    if (y == this.game_size - 1 && x > 0) {
-                        // Check each column to make sure it is connected at some point to next.
-                        var connects = false;
-                        for (var y2 = 0; y2 < this.game_size; y2++) {
-                            connects = this.get_tile(x-1, y2, w).right_empty;
-                            if (connects) {
+                                // Deal with the mirror side.
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w), w).bottom_empty = true;
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w) + 1, w).top_empty = true;
+
                                 break;
                             }
                         }
 
-                        if (!connects) {
-                            yf = randInt(0, this.game_size - 1);
-                            console.log(x, yf);
-                            this.get_tile(x-1, yf, w).right_empty = true;
-                            this.get_tile(x, yf, w).left_empty = true;
-                            this.get_tile((this.game_size - x - 2), yf, w).left_empty = true;
-                            this.get_tile((this.game_size - x - 1), yf, w).right_empty = true;
+                        // If it's left side is closed off, and on it's left is a tile that is in the 'seen' array, connect the two.
+                        if (!curr.left_empty && curr.position.x > 0) {
+                            if (checkIn(seen_tiles, this.get_tile((curr.position.x / w) - 1, (curr.position.y / w), w))) {
+
+                                curr.left_empty = true;
+                                this.get_tile((curr.position.x / w) - 1, (curr.position.y / w), w).right_empty = true;
+
+                                // Deal with the mirror side.
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w), w).right_empty = true;
+                                this.get_tile((this.game_size - (curr.position.x / w)), (curr.position.y / w), w).left_empty = true;
+
+                                break;
+                            }
+                        }
+
+                        // If it's top side is closed off, and on it's top is a tile that is in the 'seen' array, connect the two.
+                        if (!curr.top_empty && curr.position.y > 0) {
+                            if (checkIn(seen_tiles, this.get_tile((curr.position.x / w), (curr.position.y / w) - 1, w))) {
+
+                                curr.top_empty = true;
+                                this.get_tile((curr.position.x / w), (curr.position.y / w) - 1, w).bottom_empty = true;
+
+                                // Deal with the mirror side.
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w), w).top_empty = true;
+                                this.get_tile((this.game_size - (curr.position.x / w) - 1), (curr.position.y / w) - 1, w).bottom_empty = true;
+
+                                break;
+                            }
                         }
                     }
                 }
             }
-            if (i <= max_i) break;
         }
 
     }
@@ -188,4 +257,11 @@ function map() {
 function randInt(min, max) {
     // Generate a random number between min and max (inclusive)
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function checkIn(array, val) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i].equals(val)) return true;
+    }
+    return false;
 }
