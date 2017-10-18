@@ -16,28 +16,28 @@ function tile(position, t, r, b, l, s) {
 
     this.draw = function (context) { 
         context.fillColor = "#0000FF";
-        context.fillRect(this.position.elements[0],                 this.position.elements[1],                 this.size, this.size); // Top left rect
-        context.fillRect(this.position.elements[0] + this.size * 2, this.position.elements[1],                 this.size, this.size); // Top right rect
-        context.fillRect(this.position.elements[0],                 this.position.elements[1] + this.size * 2, this.size, this.size); // Bottom left rect
-        context.fillRect(this.position.elements[0] + this.size * 2, this.position.elements[1] + this.size * 2, this.size, this.size); // Bottom right rect
+        context.fillRect(this.position.x,                 this.position.y,                 this.size, this.size); // Top left rect
+        context.fillRect(this.position.x + this.size * 2, this.position.y,                 this.size, this.size); // Top right rect
+        context.fillRect(this.position.x,                 this.position.y + this.size * 2, this.size, this.size); // Bottom left rect
+        context.fillRect(this.position.x + this.size * 2, this.position.y + this.size * 2, this.size, this.size); // Bottom right rect
         
         if (!this.top_empty) {
-            context.fillRect(this.position.elements[0] + this.size,     this.position.elements[1],                 this.size, this.size); // Top rect
+            context.fillRect(this.position.x + this.size,     this.position.y,                 this.size, this.size); // Top rect
         }   
         if (!this.right_empty) {
-            context.fillRect(this.position.elements[0] + this.size * 2, this.position.elements[1] + this.size,     this.size, this.size); // Right rect
+            context.fillRect(this.position.x + this.size * 2, this.position.y + this.size,     this.size, this.size); // Right rect
         }   
         if (!this.bottom_empty) {
-            context.fillRect(this.position.elements[0] + this.size,     this.position.elements[1] + this.size * 2, this.size, this.size); // Bottom rect
+            context.fillRect(this.position.x + this.size,     this.position.y + this.size * 2, this.size, this.size); // Bottom rect
         }   
         if (!this.left_empty) {
-            context.fillRect(this.position.elements[0],                 this.position.elements[1] + this.size,     this.size, this.size); // Left rect
+            context.fillRect(this.position.x,                 this.position.y + this.size,     this.size, this.size); // Left rect
         }
 
         // If DEBUG is true, this draws a red border on each tile.
         if (DEBUG) {
             context.strokeStyle = "#FF0000";
-            context.strokeRect(this.position.elements[0], this.position.elements[1], this.full_size, this.full_size);
+            context.strokeRect(this.position.x, this.position.y, this.full_size, this.full_size);
         }
     }
 
@@ -49,12 +49,12 @@ function tile(position, t, r, b, l, s) {
 
 var map = {
 
-    get_tile : function(x, y, game_size, tiles) {
+    get_tile : function(x, y, tile_size, tiles) {
         for (var i = 0; i < tiles.length; i++) {
             item = tiles[i];
-            //console.log(item.position.elements[0], game_size, x, item.position.elements[0] / (game_size * 3 ))
-            if (item.position.elements[0] / game_size == x &&
-                item.position.elements[1] / game_size == y) {
+            //console.log(item.position.elements[0], tile_size, x, item.position.elements[0] / (tile_size * 3 ))
+            if (item.position.x / tile_size == x &&
+                item.position.y / tile_size == y) {
                 return item;
             }
         }
@@ -114,8 +114,8 @@ var map = {
                         continue;
                     }
 
-                    tiles.push(new tile(new vector(x * w, y * w), t, r, b, l, s));
-                    tiles.push(new tile(new vector((game_size - x - 1) * w, y * w), t, l, b, r, s)); // Mirror the map left / right
+                    tiles.push(new tile(new vector2(x * w, y * w), t, r, b, l, s));
+                    tiles.push(new tile(new vector2((game_size - x - 1) * w, y * w), t, l, b, r, s)); // Mirror the map left / right
                 }
             }
             if (i <= max_i) break;
