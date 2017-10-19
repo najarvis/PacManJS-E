@@ -1,17 +1,5 @@
-$(document).ready(function() {
-    var canvas = document.getElementById('canvas');
-    canvas.width = $(window).width();
-    canvas.height = $(window).height();
-
-    var context = canvas.getContext("2d");
-
-    var m = new map();
-    m.start();
-    m.draw(context);
-});
-
 // changing this from true to false will remove the red lines surrounding the tiles.
-DEBUG = true;
+DEBUG = false;
 
 function tile(position, top_e, right_e, bottom_e, left_e, size) {
     // This is basically the constructor.
@@ -65,12 +53,32 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
                 this.position.x == other.position.x &&
                 this.position.y == other.position.y);
     }
+
+    this.get_pellets = function() {
+        var base_pos = new vector2(this.position.x + this.full_size / 2, this.position.y + this.full_size / 2)
+        var p = [base_pos];
+        if (this.left_empty) {
+            p.push(base_pos.add(new vector2(-this.size, 0)));
+        }
+        if (this.right_empty) {
+            p.push(base_pos.add(new vector2(this.size, 0)));
+        }
+        if (this.top_empty) {
+            p.push(base_pos.add(new vector2(0, -this.size)));
+        }
+        if (this.bottom_empty) {
+            p.push(base_pos.add(new vector2(0, this.size)));
+        }
+
+        return p;
+    }
 }
 
 function map() {
 
     this.tiles = [];
     this.game_size = 8;
+    this.tile_size = 24;
 
     // Gets a tile object from x, y coordinates. The coordinates don't need to
     // know anything about the size of the tiles themselves. Think about it as
@@ -87,7 +95,7 @@ function map() {
 
     this.start = function () {
 
-        var s = 24;
+        var s = this.tile_size;
         var w = s * 3;
 
         while (true) {
@@ -251,6 +259,13 @@ function map() {
         for (var i = 0; i < this.tiles.length; i++) {
             this.tiles[i].draw(ctx);
         }
+    }
+
+    this.check_corner = function(tile) {
+        return (tile.position.x == 0 && tile.position.y == 0 ||
+                tile.position.x == 0 && tile.position.y == (this.game_size - 1) * this.tile_size * 3 ||
+                tile.position.x == (this.game_size - 1) * this.tile_size * 3 && tile.position.y == 0 ||
+                tile.position.x == (this.game_size - 1) * this.tile_size * 3 && tile.position.y == (this.game_size - 1) * this.tile_size * 3);
     }
 }
 
