@@ -84,6 +84,7 @@ function game_handler() {
 
         for (var i = 0; i < this.pellets.length; i++) {
             this.pellets[i].draw(ctx);
+			drawingThing.drawPellet(this.pellets[i]);
         }
 
         for (var i = 0; i < this.ghosts.length; i++) {

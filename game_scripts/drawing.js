@@ -4,13 +4,11 @@
    */
 
 var drawingThing = new drawing(document.getElementById("canvas3d"));
-drawingThing.drawDebugCube(3);
 
 
 function drawing(canvas) {
 	
 	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
 	//From https://stackoverflow.com/questions/41786413/render-three-js-scene-in-html5-canvas
 	var renderer = new THREE.WebGLRenderer( { canvas: canvas } );
 	//renderer.setSize( window.innerWidth, window.innerHeight );
@@ -20,16 +18,23 @@ function drawing(canvas) {
 	var blueBasicMaterial = new THREE.MeshBasicMaterial( { color: 0x0000ff} );
 	var blueMaterial = new THREE.MeshStandardMaterial( { color: 0x0000ff} );
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
+	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
 	
 	
 	//The camera is 5 units away from the thing.
-	camera.position.z = 5;
-	var light = new THREE.PointLight( 0xffffff, 1, 100 );
-	light.position.set( 0, 0, 5 );
+	var camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
+	var CAMERA_DISTANCE = 500;
+	var CAMERA_POSITION = 250;
+	camera.position.set(CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE);
+	var light = new THREE.PointLight( 0xffffff, 2, CAMERA_DISTANCE*2 );
+	light.position.set( CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE );
 	scene.add( light );
-
 	
-    this.tiles = [];
+	
+	//Holds all geometry related to tiles.
+    var tiles = [];
+	//Holds all geometry related to pellets.
+    var pellets = [];
 	
 	
 	var cube;
@@ -65,20 +70,51 @@ function drawing(canvas) {
         if (!tile.left_empty) {
             createWallRect(tile.position.x,                 tile.position.y + tile.size,     tile.size, tile.size); // Left rect
         }
+	
+		function createWallRect(x, y, xSize, ySize) {
+			var geometry = new THREE.BoxGeometry( xSize, ySize, xSize );
+			var mesh = new THREE.Mesh( geometry, wallMaterial );
+			mesh.position.set( x+xSize/2, y+ySize/2, 0 );
+			tiles.push(mesh);
+			scene.add( mesh );
+		}
     }
 	
-	 /** Draws a tile.
-	   * @param tile the tile to draw.
-	   */
-	function createWallRect(x, y, xSize, ySize) {
-		var geometry = new THREE.BoxGeometry( xSize, ySize, xSize );
-		cube = new THREE.Mesh( geometry, wallMaterial );
-		cube.position.set( x+xSize/2, y+ySize/2, 0 );
-		scene.add( cube );
-	}
 	
+	
+	 /** Draws a pellet.
+	   * @param pellet the pellet to draw.
+	   */
+    this.drawPellet = function(pellet) {
+        if (pellet.type == "default") {
+			createPelletSphere(pellet.pos.x, pellet.pos.y, pellet.size);
+        }
+        else {
+            createPelletSphere(pellet.pos.x, pellet.pos.y, pellet.size * 1.5);
+        }
+	
+		//Creates the actual sphere.
+		function createPelletSphere(x, y, size) {
+			//Creates a shpere with a given size and a "fidelity" of 5 and 4 for the width and height.
+			var geometry = new THREE.SphereGeometry( size, 5, 4 );
+			var mesh = new THREE.Mesh( geometry, pelletMaterial );
+			mesh.position.set( x, y, 0 );
+			pellets.push(mesh);
+			scene.add( mesh );
+		}
+    }
+	
+	
+	//The animation/draw loop.
 	function animate() {
 		requestAnimationFrame( animate );
+
+		//Loop through all the tiles and rotate them
+		tiles.forEach(function(item, index, array) {
+			//item.rotation.y += 0.01;
+		});
+		
+		//If the debug cube exists, rotate it.
 		if (cube != undefined) {
 			cube.rotation.y += 0.01;
 		}
