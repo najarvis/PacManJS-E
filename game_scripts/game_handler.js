@@ -1,7 +1,9 @@
+
+//Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
-    canvas.width = $(window).width();
-    canvas.height = $(window).height();
+    canvas.width = 32*3*8//$(window).width();
+    canvas.height = 32*3*8//$(window).height();
 
     var context = canvas.getContext("2d");
 
@@ -9,11 +11,23 @@ $(document).ready(function() {
     gh.draw(context);
 });
 
+
+ /** A class which represents a pellet.
+   * 
+   * Creates a pellet with a position, a size, and a type.
+   * @param pos the position of the pellet, as a vector2.
+   * @param size the size of the pellet, as a number.
+   * @param type the type of the pellet, as a string stating either "default" or something other than default.
+   */
 function pellet(pos, size, type) {
     this.pos = pos;
     this.size = size;
     this.type = type;
 
+	
+	 /** Draws the pellet.
+	   * @param ctx the canvas context to draw on.
+	   */
     this.draw = function(ctx) {
         if (this.type == "default") {
             ctx.fillStyle = "#DDDD00";
@@ -31,12 +45,17 @@ function pellet(pos, size, type) {
 }
 
 
+//Create a pellet (I think).
+ /** Handles the main game loop. Equivilant of "tester" in java.
+   * 
+   */
 function game_handler() {
-
+	
     this.pellets = [];
     this.pacman = undefined;
     this.ghosts = [];
-
+	
+	
     this.game_map = new map();
     this.game_map.start();
 
@@ -52,8 +71,16 @@ function game_handler() {
         }
     }
 
+	 /** Draws the game, including the pellets and the ghosts.
+	   * @param ctx the canvas context to draw on.
+	   */
     this.draw = function(ctx) {
         this.game_map.draw(ctx);
+		
+		//Tests out the methods defiend in the drawing.js file.
+		for (var i = 0; i < this.game_map.tiles.length; i++) {
+			drawingThing.drawTile(this.game_map.tiles[i]);
+		}
 
         for (var i = 0; i < this.pellets.length; i++) {
             this.pellets[i].draw(ctx);
@@ -64,3 +91,9 @@ function game_handler() {
         }
     }
 }
+
+
+
+
+
+
