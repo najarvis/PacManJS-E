@@ -2,8 +2,8 @@
 //Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
-    canvas.width = 32*3*8//$(window).width();
-    canvas.height = 32*3*8//$(window).height();
+    canvas.width = 24*3*8//$(window).width();
+    canvas.height = 24*3*8//$(window).height();
 
     var context = canvas.getContext("2d");
 

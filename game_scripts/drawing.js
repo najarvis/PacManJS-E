@@ -24,7 +24,7 @@ function drawing(canvas) {
 	//The camera is 5 units away from the thing.
 	var camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
 	var CAMERA_DISTANCE = 500;
-	var CAMERA_POSITION = 250;
+	var CAMERA_POSITION = 288;
 	camera.position.set(CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE);
 	var light = new THREE.PointLight( 0xffffff, 2, CAMERA_DISTANCE*2 );
 	light.position.set( CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE );
