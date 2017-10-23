@@ -74,7 +74,7 @@ function drawing(canvas) {
 		function createWallRect(x, y, xSize, ySize) {
 			var geometry = new THREE.BoxGeometry( xSize, ySize, xSize );
 			var mesh = new THREE.Mesh( geometry, wallMaterial );
-			mesh.position.set( x+xSize/2, y+ySize/2, 0 );
+			mesh.position.set( x+xSize/2, canvas.height - y - ySize/2, 0 );
 			tiles.push(mesh);
 			scene.add( mesh );
 		}
@@ -98,7 +98,7 @@ function drawing(canvas) {
 			//Creates a shpere with a given size and a "fidelity" of 5 and 4 for the width and height.
 			var geometry = new THREE.SphereGeometry( size, 5, 4 );
 			var mesh = new THREE.Mesh( geometry, pelletMaterial );
-			mesh.position.set( x, y, 0 );
+			mesh.position.set( x, canvas.height - y, 0 );
 			pellets.push(mesh);
 			scene.add( mesh );
 		}
