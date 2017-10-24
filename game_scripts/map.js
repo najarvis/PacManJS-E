@@ -1,6 +1,17 @@
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
 
+
+ /** A class which represents a "tile".
+   * 
+   * Creates a tile with a position, a size, and given empty walls..
+   * @param position the position of the tile, as a vector2.
+   * @param top_e A boolean of whether or not the top part of the tile is empty.
+   * @param right_e A boolean of whether or not the right part of the tile is empty.
+   * @param bottom_e A boolean of whether or not the bottom part of the tile is empty.
+   * @param left_e A boolean of whether or not the left part of the tile is empty.
+   * @param size The size of 1/3 of the tile.
+   */
 function tile(position, top_e, right_e, bottom_e, left_e, size) {
     // This is basically the constructor.
     this.top_empty = top_e;
@@ -12,7 +23,10 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
     this.full_size = size * 3 // Pixels
     this.size = size; // Size here is the size of each sub square that gets drawn. Full_size is the size of the entire tile.
 
-    // Draws the tile onto the given context.
+	
+	 /** Draws the tile onto the given context.
+	   * @param ctx the canvas context to draw on.
+	   */
     this.draw = function (ctx) { 
         ctx.fillColor = "#0000FF";
         ctx.fillRect(this.position.x,                 this.position.y,                 this.size, this.size); // Top left rect
@@ -39,12 +53,19 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
             ctx.strokeRect(this.position.x, this.position.y, this.full_size, this.full_size);
         }
     }
-
-    // Simply changes the stored position of a tile.
+	
+	
+	 /** Simply changes the stored position of a tile.
+	   * @param position the new vector2 position of the tile.
+	   */
     this.set_position = function(position) {
         this.position = position;
     }
 
+	
+	 /** Checks if a tile is equal to another tile.
+	   * @param other The other tile to compare to.
+	   */
     this.equals = function(other) {
         return (this.top_empty == other.top_empty &&
                 this.right_empty == other.right_empty &&
@@ -73,6 +94,8 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
         return p;
     }
 }
+
+
 
 function map() {
 

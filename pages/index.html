@@ -2,6 +2,8 @@
     <head>
         <title>Pac-Man JS</title>
         <script type="text/javascript" src="../res/js/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="../game_scripts/three.min.js"></script>
+        <script type="text/javascript" src="../game_scripts/drawing.js" async></script>
         <script type="text/javascript" src="../game_scripts/vector2.js" async></script>
         <script type="text/javascript" src="../game_scripts/map.js" async></script>
         <script type="text/javascript" src="../game_scripts/game_handler.js" async></script>
@@ -11,7 +13,7 @@
             }
 
             body {
-                overflow: hidden;
+                /*overflow: hidden;*/
                 margin: 0;
                 padding: 0;
             }
@@ -19,5 +21,6 @@
     </head>
     <body style="background-color: #dddddd">
         <canvas id="canvas"></canvas>
+        <canvas id="canvas3d" width=576 height=576></canvas>
     </body>
 </html>
