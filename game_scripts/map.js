@@ -97,7 +97,9 @@ function map() {
 
         var s = this.tile_size;
         var w = s * 3;
-
+        var attempt = 0;
+        
+        console.log("Creating the map...");
         while (true) {
             // My current solution is basically to retry creating the map until it works.
             this.tiles = [];
@@ -151,8 +153,10 @@ function map() {
                 }
             }
             if (i <= max_i) break;
+            console.log("Attempt #" + ++attempt + " failed...");
         }
 
+        console.log("Going into the fill algorithm...");
         // Fill algorithm
         var seen_tiles = [];
         while (seen_tiles.length < this.tiles.length) {
