@@ -1,27 +1,41 @@
 
+
+//Constants
+TILE_SIZE = 32;
+MAP_SIZE_X = 10;
+MAP_SIZE_Y = 10;
+PELLET_SIZE = 3;
+// changing this from true to false will remove the red lines surrounding the tiles.
+DEBUG = false;
+
+var drawingThing = new drawing(document.getElementById("canvas3d"));
 //Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
-    canvas.width = 24*3*8//$(window).width();
-    canvas.height = 24*3*8//$(window).height();
+    canvas.width = TILE_SIZE*MAP_SIZE_X//$(window).width();
+    canvas.height = TILE_SIZE*MAP_SIZE_Y//$(window).height();
 
     var context = canvas.getContext("2d");
-
+	
+	//Draws 3D elements.
+	//drawingThing = new drawing(document.getElementById("canvas3d"));
+	
+	
     var gh = new game_handler();
     gh.draw(context);
 });
+
+
 
 
  /** A class which represents a pellet.
    * 
    * Creates a pellet with a position, a size, and a type.
    * @param pos the position of the pellet, as a vector2.
-   * @param size the size of the pellet, as a number.
    * @param type the type of the pellet, as a string stating either "default" or something other than default.
    */
-function pellet(pos, size, type) {
+function pellet(pos, type) {
     this.pos = pos;
-    this.size = size;
     this.type = type;
 
 	
@@ -32,13 +46,13 @@ function pellet(pos, size, type) {
         if (this.type == "default") {
             ctx.fillStyle = "#DDDD00";
             ctx.beginPath();
-            ctx.arc(this.pos.x, this.pos.y, this.size, 0, 360);
+            ctx.arc(this.pos.x, this.pos.y, PELLET_SIZE, 0, 360);
             ctx.fill();
         }
         else {
             ctx.fillStyle = "#DDDD00";
             ctx.beginPath();
-            ctx.arc(this.pos.x, this.pos.y, this.size * 1.5, 0, 360);
+            ctx.arc(this.pos.x, this.pos.y, PELLET_SIZE * 1.5, 0, 360);
             ctx.fill();
         }
     }
@@ -63,10 +77,10 @@ function game_handler() {
         var p = this.game_map.tiles[i].get_pellets();
         for (var j = 0; j < p.length; j++) {
             if (j == 0 && this.game_map.check_corner(this.game_map.tiles[i])) {
-                this.pellets.push(new pellet(p[j], this.game_map.tile_size / 4, "power"));
+                this.pellets.push(new pellet(p[j], "power"));
             }
             else {
-                this.pellets.push(new pellet(p[j], this.game_map.tile_size / 4, "default"));
+                this.pellets.push(new pellet(p[j], "default"));
             }
         }
     }
