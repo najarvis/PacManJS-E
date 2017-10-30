@@ -20,13 +20,9 @@ $(document).ready(function() {
 	//Draws 3D elements.
 	//drawingThing = new drawing(document.getElementById("canvas3d"));
 	
-	
     var gh = new game_handler();
     gh.draw(context);
 });
-
-
-
 
  /** A class which represents a pellet.
    * 
@@ -106,9 +102,3 @@ function game_handler() {
         }
     }
 }
-
-
-
-
-
-
