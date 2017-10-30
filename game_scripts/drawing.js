@@ -3,7 +3,6 @@
    * @param canvas The canvas to draw to.
    */
 
-var drawingThing = new drawing(document.getElementById("canvas3d"));
 
 
 function drawing(canvas) {
@@ -23,11 +22,12 @@ function drawing(canvas) {
 	
 	//The camera is 5 units away from the thing.
 	var camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
-	var CAMERA_DISTANCE = 500;
-	var CAMERA_POSITION = 288;
-	camera.position.set(CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE);
-	var light = new THREE.PointLight( 0xffffff, 2, CAMERA_DISTANCE*2 );
-	light.position.set( CAMERA_POSITION, CAMERA_POSITION, CAMERA_DISTANCE );
+	var CAMERA_DISTANCE = MAP_SIZE_X*TILE_SIZE*0.75;
+	camera.scale.set(1,-1,-1);
+	//camera.scale.z = -1;
+	camera.position.set(MAP_SIZE_X*TILE_SIZE/2, MAP_SIZE_Y*TILE_SIZE/2, -CAMERA_DISTANCE);
+	var light = new THREE.PointLight( 0xffffff, 2, CAMERA_DISTANCE*5 );
+	light.position.set( MAP_SIZE_X*TILE_SIZE/2, MAP_SIZE_Y*TILE_SIZE/2, -CAMERA_DISTANCE*2);
 	scene.add( light );
 	
 	
@@ -38,6 +38,7 @@ function drawing(canvas) {
 	
 	
 	var cube;
+	
 	 /** Draws a cube with the given size.
 	   * @param size the size of the cube.
 	   */
@@ -47,34 +48,42 @@ function drawing(canvas) {
 		scene.add( cube );
 	}
 	
+	this.drawDebugCube(1);
 	
 	
 	 /** Draws a tile.
 	   * @param tile the tile to draw.
 	   */
     this.drawTile = function(tile) {
-        createWallRect(tile.position.x,                 tile.position.y,                 tile.size, tile.size); // Top left rect
-        createWallRect(tile.position.x + tile.size * 2, tile.position.y,                 tile.size, tile.size); // Top right rect
-        createWallRect(tile.position.x,                 tile.position.y + tile.size * 2, tile.size, tile.size); // Bottom left rect
-        createWallRect(tile.position.x + tile.size * 2, tile.position.y + tile.size * 2, tile.size, tile.size); // Bottom right rect
+		//This variable determines the width of the walls.
+		//The walls will be 1/SIZE_DIVISOR the size of a tile.
+		var SIZE_DIVISOR = 8;
+		var wallSize = tile.size/SIZE_DIVISOR;
+		var sDMinus1 = SIZE_DIVISOR-1;
+		var sDMinus2 = SIZE_DIVISOR-2;
+		
+        createWallRect(tile.position.x,                 tile.position.y,                 wallSize, wallSize); // Top left rect
+        createWallRect(tile.position.x + wallSize*sDMinus1, tile.position.y,                 wallSize, wallSize); // Top right rect
+        createWallRect(tile.position.x,                 tile.position.y + wallSize*sDMinus1, wallSize, wallSize); // Bottom left rect
+        createWallRect(tile.position.x + wallSize*sDMinus1, tile.position.y + wallSize*sDMinus1, wallSize, wallSize); // Bottom right rect
         
         if (!tile.top_empty) {
-            createWallRect(tile.position.x + tile.size,     tile.position.y,                 tile.size, tile.size); // Top rect
+            createWallRect(tile.position.x + wallSize,     tile.position.y,                 wallSize*sDMinus2, wallSize); // Top rect
         }   
         if (!tile.right_empty) {
-            createWallRect(tile.position.x + tile.size * 2, tile.position.y + tile.size,     tile.size, tile.size); // Right rect
+            createWallRect(tile.position.x + wallSize*sDMinus1, tile.position.y + wallSize,     wallSize, wallSize*sDMinus2); // Right rect
         }   
         if (!tile.bottom_empty) {
-            createWallRect(tile.position.x + tile.size,     tile.position.y + tile.size * 2, tile.size, tile.size); // Bottom rect
+            createWallRect(tile.position.x + wallSize,     tile.position.y + wallSize*sDMinus1, wallSize*sDMinus2, wallSize); // Bottom rect
         }   
         if (!tile.left_empty) {
-            createWallRect(tile.position.x,                 tile.position.y + tile.size,     tile.size, tile.size); // Left rect
+            createWallRect(tile.position.x,                 tile.position.y + wallSize,     wallSize, wallSize*sDMinus2); // Left rect
         }
 	
 		function createWallRect(x, y, xSize, ySize) {
-			var geometry = new THREE.BoxGeometry( xSize, ySize, xSize );
+			var geometry = new THREE.BoxGeometry( xSize, ySize, 16 );
 			var mesh = new THREE.Mesh( geometry, wallMaterial );
-			mesh.position.set( x+xSize/2, canvas.height - y - ySize/2, 0 );
+			mesh.position.set( x+xSize/2, y+ySize/2, 0 );
 			tiles.push(mesh);
 			scene.add( mesh );
 		}
@@ -87,10 +96,10 @@ function drawing(canvas) {
 	   */
     this.drawPellet = function(pellet) {
         if (pellet.type == "default") {
-			createPelletSphere(pellet.pos.x, pellet.pos.y, pellet.size);
+			createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE);
         }
         else {
-            createPelletSphere(pellet.pos.x, pellet.pos.y, pellet.size * 1.5);
+            createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE*1.5);
         }
 	
 		//Creates the actual sphere.
@@ -98,7 +107,7 @@ function drawing(canvas) {
 			//Creates a shpere with a given size and a "fidelity" of 5 and 4 for the width and height.
 			var geometry = new THREE.SphereGeometry( size, 5, 4 );
 			var mesh = new THREE.Mesh( geometry, pelletMaterial );
-			mesh.position.set( x, canvas.height - y, 0 );
+			mesh.position.set( x, y, 0 );
 			pellets.push(mesh);
 			scene.add( mesh );
 		}
