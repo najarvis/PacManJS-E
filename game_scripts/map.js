@@ -80,7 +80,6 @@ function map() {
                 }
             }
             if (i <= max_i) break;
-            console.log("Attempt #" + ++attempt + " failed...");
         }
 
         console.log("Going into the fill algorithm...");
