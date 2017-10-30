@@ -2,9 +2,6 @@
  /** A class which handles the drawing of everything.
    * @param canvas The canvas to draw to.
    */
-
-
-
 function drawing(canvas) {
 	
 	var scene = new THREE.Scene();
@@ -18,6 +15,7 @@ function drawing(canvas) {
 	var blueMaterial = new THREE.MeshStandardMaterial( { color: 0x0000ff} );
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
 	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
+	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00 } );
 	
 	
 	//The camera is 5 units away from the thing.
@@ -113,11 +111,47 @@ function drawing(canvas) {
 		}
     }
 	
+	//Holds the "mesh" object that represents Pacman.
+	var pacman = null;
+	
+	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
+	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
+	   * @param x The x-position of Pacman.
+	   * @param y The y-position of Pacman.
+	   * @param mouthOpen the amount open that the mouth is. Ranges from 0 for closed, to 0.2 for open.
+	   * @param direction the direction that Pacman faces, ranging from 0 for right to 3 to bottom.
+	   */
+	this.drawPacman = function(x, y, mouthOpen, direction) {
+		if (pacman != null) {
+			scene.remove(pacman);
+		}
+		
+		var geometry = new THREE.SphereGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
+		pacman = new THREE.Mesh( geometry, pacmanMaterial );
+		pacman.position.set( x, y, 0 );
+		//makes sure Pacman faces the correct way.
+		pacman.rotateX(Math.PI/2);
+		pacman.rotateZ((direction+2)*Math.PI/2);
+		scene.add( pacman );
+	}
+	
+	
+	var testingPacmanAnimation = 0;
 	
 	//The animation/draw loop.
-	function animate() {
-		requestAnimationFrame( animate );
-
+	this.animate = function() {
+		requestAnimationFrame( this.animate.bind(this) );
+		
+		
+		//Testing the Pacman drawing function.
+		this.drawPacman(TILE_SIZE*2.5, TILE_SIZE*2.5, Math.abs(testingPacmanAnimation), 0);
+		//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
+		testingPacmanAnimation += 0.02;
+		if (testingPacmanAnimation > 0.2) {
+			testingPacmanAnimation = -0.2;	
+		}
+		
+		
 		//Loop through all the tiles and rotate them
 		tiles.forEach(function(item, index, array) {
 			//item.rotation.y += 0.01;
@@ -129,7 +163,7 @@ function drawing(canvas) {
 		}
 		renderer.render( scene, camera );
 	}
-	animate();
+	this.animate();
 	
 	/*
     this.pellets = [];
