@@ -74,7 +74,11 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
                 this.position.x == other.position.x &&
                 this.position.y == other.position.y);
     }
-
+	
+	
+	 /** Gets the positions of the pellets.
+	   * @return An array of Vector2s representing the positions of all the pellets in this tile.
+	   */
     this.get_pellets = function() {
         var base_pos = new vector2(this.position.x + this.size / 2, this.position.y + this.size / 2)
         var p = [base_pos];
