@@ -24,6 +24,6 @@ func main() {
     http.HandleFunc("/", rootHandler)
     http.Handle("/game_scripts/", http.StripPrefix("/game_scripts/", http.FileServer(http.Dir("game_scripts"))))
     http.Handle("/res/", http.StripPrefix("/res/", http.FileServer(http.Dir("res"))))
-    fmt.Println("Running on localhost:8080");
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    fmt.Println("Running on localhost:3333");
+    log.Fatal(http.ListenAndServe(":3333", nil))
 }

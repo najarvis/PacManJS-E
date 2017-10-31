@@ -1,36 +1,39 @@
-/** A class which represents Pacman!
-   * 
-   * Creates Pacman in the specified tile coordinates.
-   * @param x The x-value of the tile.
-   * @param y The y-value of the tile.
-   */
-function pacman(xTile, yTile) {
-    // This is basically the constructor.
-    this.xTile = xTile;
-    this.yTile = yTile;
-	this.direction = 0;
-	
-	if (size == undefined) {
-		this.size = TILE_SIZE;
-	} else {
-		this.size = size;
-	}
-	
-	 /** Draws the tile onto the given context.
-	   * @param ctx the canvas context to draw on.
-	   */
-    this.draw = function (ctx) { 
-        ctx.fillColor = "#FFFF00";
-        ctx.fillRect(this.xTile, this.yTile, 16, 16);
-    }
-	
+function Pacman(pos) {
+    Entity.call(this, pos);
+};
 
+Pacman.prototype = Object.create(Entity.prototype);
+Pacman.prototype.constructor = Pacman;
 
-	 /** Gets the position of Pacman in normal coordinates
-	   * @return A vector2 
-	   */
-    this.getPosition = function() {
-        var position = new vector2(xTile, yTile)
-		return position;
+Pacman.prototype.update = function(map, time_delta, input, entities) {
+    // Handle user input
+    //var pos = this.vel;
+    if (input[87]){ // W
+        this.vel.y = -1;
+        this.vel.x = 0;
+        //pos = pos.add(new vector2(0, -1));
     }
-}
+    if (input[83]){ // S
+        this.vel.y = 1;
+        this.vel.x = 0;
+        //pos = pos.add(new vector2(0, 1));
+    }
+    if (input[65]){ // A
+        this.vel.x = -1;
+        this.vel.y = 0;
+        //pos = pos.add(new vector2(-1, 0));
+    }
+    if (input[68]){ // D
+        this.vel.x = 1;
+        this.vel.y = 0;
+        //pos = pos.add(new vector2(1, 0));
+    }
+    //this.vel = pos;
+
+    old_pos = this.pos;
+    this.pos = this.pos.add(this.vel.mul(this.speed * time_delta));
+    if (!this.valid_pos(map)) {
+        this.pos = old_pos;
+    }
+
+};

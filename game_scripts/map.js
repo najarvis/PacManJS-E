@@ -26,8 +26,16 @@ function map() {
         }
     },
 
-	
-	
+    this.get_tile_pos = function(pos) {
+        for (var i = 0; i < this.tiles.length; i++) {
+            item = this.tiles[i];
+            if (item.position.x <= pos.x && item.position.x + item.size > pos.x &&
+                item.position.y <= pos.y && item.position.y + item.size > pos.y) {
+                return item;
+            }
+        }
+    }
+
     this.start = function () {
 
         var s = this.tile_size;
@@ -88,6 +96,7 @@ function map() {
             if (i <= max_i) break;
         }
 
+        console.log("Going into the fill algorithm...");
         // Fill algorithm
         var seen_tiles = [];
         while (seen_tiles.length < this.tiles.length) {

@@ -27,8 +27,11 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
 	   */
     this.draw = function (ctx) { 
 		var third_size = this.size/3;
-	
-        ctx.fillColor = "#0000FF";
+
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(this.position.x, this.position.y, this.size, this.size);
+
+        ctx.fillStyle = "#0000FF";
         ctx.fillRect(this.position.x,                 this.position.y,                 third_size, third_size); // Top left rect
         ctx.fillRect(this.position.x + third_size * 2, this.position.y,                 third_size, third_size); // Top right rect
         ctx.fillRect(this.position.x,                 this.position.y + third_size * 2, third_size, third_size); // Bottom left rect
@@ -49,8 +52,10 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
 
         // If DEBUG is true, this draws a red border on each tile.
         if (DEBUG) {
+            ctx.beginPath();
             ctx.strokeStyle = "#FF0000";
             ctx.strokeRect(this.position.x, this.position.y, this.size, this.size);
+            ctx.endPath();
         }
     }
 	
@@ -74,7 +79,11 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
                 this.position.x == other.position.x &&
                 this.position.y == other.position.y);
     }
-
+	
+	
+	 /** Gets the positions of the pellets.
+	   * @return An array of Vector2s representing the positions of all the pellets in this tile.
+	   */
     this.get_pellets = function() {
         var base_pos = new vector2(this.position.x + this.size / 2, this.position.y + this.size / 2)
         var p = [base_pos];
@@ -92,5 +101,9 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
         }
 
         return p;
+    }
+
+    this.get_center = function() {
+        return this.position.add(new vector2(this.size / 2, this.size / 2));
     }
 }
