@@ -15,7 +15,13 @@ function drawing(canvas) {
 	var blueMaterial = new THREE.MeshStandardMaterial( { color: 0x0000ff} );
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
 	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
-	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00 } );
+	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00, side: THREE.DoubleSide } );
+	var ghostMaterials = [
+		new THREE.MeshStandardMaterial( { color: 0xff0000} ),
+		new THREE.MeshStandardMaterial( { color: 0x00ffff} ),
+		new THREE.MeshStandardMaterial( { color: 0xff8888} ),
+		new THREE.MeshStandardMaterial( { color: 0xff8800} )
+	];
 	
 	
 	//The camera is 5 units away from the thing.
@@ -111,8 +117,15 @@ function drawing(canvas) {
 		}
     }
 	
+	
+	//Creates the Pacman object.
 	//Holds the "mesh" object that represents Pacman.
-	var pacman = null;
+	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16);
+	var pacman = new THREE.Mesh( pacmanGeometry, pacmanMaterial );
+	//pacman.rotateX(Math.PI/2);
+	scene.add( pacman );
+	
+	
 	
 	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
 	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
@@ -121,22 +134,62 @@ function drawing(canvas) {
 	   * @param mouthOpen the amount open that the mouth is. Ranges from 0 for closed, to 0.2 for open.
 	   * @param direction the direction that Pacman faces, ranging from 0 for right to 3 to bottom.
 	   */
-	this.drawPacman = function(x, y, mouthOpen, direction) {
-		if (pacman != null) {
-			scene.remove(pacman);
-		}
-		
-		var geometry = new THREE.SphereGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
-		pacman = new THREE.Mesh( geometry, pacmanMaterial );
+	this.drawPacman = function(x, y, mouthOpen, direction) {		
+		pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
+		pacman.geometry = pacmanGeometry;
 		pacman.position.set( x, y, 0 );
 		//makes sure Pacman faces the correct way.
-		pacman.rotateX(Math.PI/2);
-		pacman.rotateZ((direction+2)*Math.PI/2);
-		scene.add( pacman );
+		pacman.rotation.set(Math.PI/2, 0, (direction+2)*Math.PI/2);
+	}
+	
+	
+	
+	this.createGhost = function(ghostNumber) {
+		var GHOST_RADIUS = TILE_SIZE/4;
+		//Represents the whole ghost.
+		var ghost = new THREE.Group();
+		
+		//Create the "base" of the ghost.
+		var ghostBase = new THREE.Mesh( new THREE.CylinderGeometry( GHOST_RADIUS, GHOST_RADIUS, GHOST_RADIUS, 16 ),
+				ghostMaterials[ghostNumber]);
+		ghostBase.position.y = GHOST_RADIUS/2;
+		ghost.add(ghostBase);
+		
+		//Create the "head" of the ghost.
+		var ghostHead = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS, 16, 16,  0, Math.PI*2, 0 ,Math.PI/2),
+				ghostMaterials[ghostNumber]);
+		ghostHead.rotateZ(Math.PI);
+		ghost.add(ghostHead);
+		
+		//Create a realistic light on the ghosts to make the game look more tacky.
+		var light = new THREE.PointLight( ghostMaterials[ghostNumber].color, 3, TILE_SIZE*2 );
+		ghost.add(light);
+		
+		scene.add( ghost );
+		return ghost;
+	}
+	
+	var ghosts = [
+		this.createGhost(0),
+		this.createGhost(1),
+		this.createGhost(2),
+		this.createGhost(3)
+	];
+	
+	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
+	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
+	   * @param x The x-position of Pacman.
+	   * @param y The y-position of Pacman.
+	   * @param ghostNumber The ghost to move. Ranges from 0 to 3 for Blinky, Inky, Pinky, and Clyde.
+	   * @param blue Whether the ghost is blue and afraid.
+	   */
+	this.drawGhost = function(x, y, ghostNumber, blue) {
+		ghosts[ghostNumber].position.set( x, y, 0 );
 	}
 	
 	
 	var testingPacmanAnimation = 0;
+	var testingGhostAnimation = 0;
 	
 	//The animation/draw loop.
 	this.animate = function() {
@@ -152,15 +205,17 @@ function drawing(canvas) {
 		}
 		
 		
-		//Loop through all the tiles and rotate them
-		tiles.forEach(function(item, index, array) {
-			//item.rotation.y += 0.01;
-		});
-		
-		//If the debug cube exists, rotate it.
-		if (cube != undefined) {
-			cube.rotation.y += 0.01;
+		//Testing the ghost drawing function.	
+			
+		this.drawGhost(testingGhostAnimation,TILE_SIZE*0.5,0);
+		this.drawGhost(testingGhostAnimation,TILE_SIZE*1.5,1);
+		this.drawGhost(testingGhostAnimation,TILE_SIZE*3.5,2);
+		this.drawGhost(testingGhostAnimation,TILE_SIZE*4.5,3);
+		testingGhostAnimation += 1;
+		if (testingGhostAnimation > TILE_SIZE*MAP_SIZE_X) {
+			testingGhostAnimation = 0;	
 		}
+		
 		renderer.render( scene, camera );
 	}
 	this.animate();
