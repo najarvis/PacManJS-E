@@ -49,7 +49,7 @@ function game_handler() {
     this.last_frame = new Date();
 
     this.pacman = new Pacman(this.game_map.tiles[0].get_center());
-    this.pacman.vel.y = 1;
+    //this.pacman.vel.y = 1;
 
     for (var i = 0; i < this.game_map.tiles.length; i++) {
         var p = this.game_map.tiles[i].get_pellets();

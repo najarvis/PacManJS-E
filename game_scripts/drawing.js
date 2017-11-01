@@ -127,13 +127,16 @@ function drawing(canvas) {
 	//Holds the "mesh" object that represents Pacman.
 	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16);
 	var pacman = new THREE.Mesh( pacmanGeometry, pacmanMaterial );
+	var pacmanLight = new THREE.PointLight( pacmanMaterial.color/*"#FFFFFF"/*/, 3, TILE_SIZE*3 );
+	pacmanLight.position.set(0,-TILE_SIZE*0,0);
+	pacman.add(pacmanLight);
 	scene.add( pacman );
 	
 	
 	
 	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
 	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
-	   * @param x The x-position of Pacman.
+	   * @param x The x-position of Pacman.ws
 	   * @param y The y-position of Pacman.
 	   * @param mouthOpen the amount open that the mouth is. Ranges from 0 for closed, to 0.2 for open.
 	   * @param direction the direction that Pacman faces, ranging from 0 for right to 3 to bottom.
@@ -150,7 +153,7 @@ function drawing(canvas) {
 				pacman.rotation.set(Math.PI/2, (4)*Math.PI/2, 0);
 			} else if (direction.y > 0) {
 				pacman.rotation.set(Math.PI/2, (3)*Math.PI/2, 0);
-			} else if (direction.y < 0) {
+			} else {
 				pacman.rotation.set(Math.PI/2, (5)*Math.PI/2, 0);
 			}
 		} else {
