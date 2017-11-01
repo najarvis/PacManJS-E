@@ -8,7 +8,7 @@ PELLET_SIZE = 3;
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
 
-//var drawingThing = new drawing(document.getElementById("canvas3d"));
+var drawingThing = new drawing(document.getElementById("canvas3d"));
 //Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
@@ -16,9 +16,6 @@ $(document).ready(function() {
     canvas.height = TILE_SIZE*MAP_SIZE_Y//$(window).height();
 
     var context = canvas.getContext("2d");
-	
-	//Draws 3D elements.
-	//drawingThing = new drawing(document.getElementById("canvas3d"));
 	
     var gh = new game_handler();
 
@@ -53,6 +50,7 @@ function game_handler() {
 
     // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
     this.pacman = new Pacman(this.game_map.tiles[0].get_center());
+    //this.generate_pellets();
 
     this.generate_pellets = function() {
         for (var i = 0; i < this.game_map.tiles.length; i++) {
@@ -65,8 +63,19 @@ function game_handler() {
                     this.pellets.push(new Pellet(p[j], "default"));
                 }
             }
+			//Draw the pellet in the 3D plane.
+        }
+        for (var i = 0; i < this.pellets.length; i++) {
+            drawingThing.drawPellet(this.pellets[i]);
+        }
+        
+                
+        //Draw the tiles in the 3D space.
+        for (var i = 0; i < this.game_map.tiles.length; i++) {
+            drawingThing.drawTile(this.game_map.tiles[i]);
         }
     }
+	
 
     this.update = function(input) {
         var new_frame = new Date();
@@ -89,6 +98,8 @@ function game_handler() {
                 this.score += 50;
                 // Power pellet code should go here.
             }
+			//Remove the 3D object representing the pellet from the 3d view.
+			drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
             console.log(this.score);
             this.pellets.splice(eaten[i], 1);
         }
@@ -99,21 +110,18 @@ function game_handler() {
         }
     }
 
+	
+	//Used for Pacman animation.
+	var testingPacmanAnimation = 0;
 	 /** Draws the game, including the pellets and the ghosts.
 	   * @param ctx the canvas context to draw on.
 	   */
     this.draw = function(canvas, ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.game_map.draw(ctx);
-		
-		//Tests out the methods defiend in the drawing.js file.
-		for (var i = 0; i < this.game_map.tiles.length; i++) {
-			//drawingThing.drawTile(this.game_map.tiles[i]);
-		}
 
         for (var i = 0; i < this.pellets.length; i++) {
             this.pellets[i].draw(ctx);
-			//drawingThing.drawPellet(this.pellets[i]);
         }
 
         for (var i = 0; i < this.ghosts.length; i++) {
@@ -121,5 +129,12 @@ function game_handler() {
         }
 
         this.pacman.draw(ctx);
+		//Draw in 3D.
+		drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
+		//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
+		testingPacmanAnimation += 0.02;
+		if (testingPacmanAnimation > 0.2) {
+			testingPacmanAnimation = -0.2;	
+		}
     }
 }

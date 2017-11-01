@@ -2,16 +2,20 @@
 
  /** A class which represents the game map.
    * 
-   * Creates a map with the 
+   * Creates a map.
    */
 function map() {
 
     this.tiles = [];
     this.tile_size = TILE_SIZE;
 
-    // Gets a tile object from x, y coordinates. The coordinates don't need to
-    // know anything about the size of the tiles themselves. Think about it as
-    // '2nd tile from the left, 3rd tile down.'
+	
+	 /** Gets a tile object from x, y coordinates. The coordinates don't need to
+	   * know anything about the size of the tiles themselves. Think about it as
+       * '2nd tile from the left, 3rd tile down.'
+	   * @param x The x-position of the tile to select.
+	   * @param y The y-position of the tile to select.
+	   */
     this.get_tile = function(x, y, tile_size) {
         for (var i = 0; i < this.tiles.length; i++) {
             item = this.tiles[i];

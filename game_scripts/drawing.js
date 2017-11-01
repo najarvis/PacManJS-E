@@ -38,7 +38,7 @@ function drawing(canvas) {
 	//Holds all geometry related to tiles.
     var tiles = [];
 	//Holds all geometry related to pellets.
-    var pellets = [];
+    var entities = [];
 	
 	
 	var cube;
@@ -55,7 +55,7 @@ function drawing(canvas) {
 	this.drawDebugCube(1);
 	
 	
-	 /** Draws a tile.
+	 /** Draws a tile. This method should only be called once.
 	   * @param tile the tile to draw.
 	   */
     this.drawTile = function(tile) {
@@ -95,16 +95,20 @@ function drawing(canvas) {
 	
 	
 	
-	 /** Draws a pellet.
+	 /** Draws a pellet. This method should only be called once.
 	   * @param pellet the pellet to draw.
+	   * @return the graphics object that represents the pellet.
 	   */
     this.drawPellet = function(pellet) {
         if (pellet.type == "default") {
-			createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE);
+			var obj3D = createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE);
         }
         else {
-            createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE*1.5);
+            var obj3D = createPelletSphere(pellet.pos.x, pellet.pos.y, PELLET_SIZE*1.5);
         }
+		//Set the pellet's drawingObject3D to be the correct object.
+		pellet.drawingObject3D = obj3D;
+		return obj3D;
 	
 		//Creates the actual sphere.
 		function createPelletSphere(x, y, size) {
@@ -112,8 +116,9 @@ function drawing(canvas) {
 			var geometry = new THREE.SphereGeometry( size, 5, 4 );
 			var mesh = new THREE.Mesh( geometry, pelletMaterial );
 			mesh.position.set( x, y, 0 );
-			pellets.push(mesh);
+			entities.push(mesh);
 			scene.add( mesh );
+			return mesh;
 		}
     }
 	
@@ -122,14 +127,16 @@ function drawing(canvas) {
 	//Holds the "mesh" object that represents Pacman.
 	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16);
 	var pacman = new THREE.Mesh( pacmanGeometry, pacmanMaterial );
-	//pacman.rotateX(Math.PI/2);
+	var pacmanLight = new THREE.PointLight( pacmanMaterial.color/*"#FFFFFF"/*/, 3, TILE_SIZE*3 );
+	pacmanLight.position.set(0,-TILE_SIZE*0,0);
+	pacman.add(pacmanLight);
 	scene.add( pacman );
 	
 	
 	
 	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
 	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
-	   * @param x The x-position of Pacman.
+	   * @param x The x-position of Pacman.ws
 	   * @param y The y-position of Pacman.
 	   * @param mouthOpen the amount open that the mouth is. Ranges from 0 for closed, to 0.2 for open.
 	   * @param direction the direction that Pacman faces, ranging from 0 for right to 3 to bottom.
@@ -138,8 +145,21 @@ function drawing(canvas) {
 		pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
 		pacman.geometry = pacmanGeometry;
 		pacman.position.set( x, y, 0 );
-		//makes sure Pacman faces the correct way.
-		pacman.rotation.set(Math.PI/2, 0, (direction+2)*Math.PI/2);
+		if (direction.x != undefined) {
+			//makes sure Pacman faces the correct way.
+			if (direction.x > 0) {
+				pacman.rotation.set(Math.PI/2, (2)*Math.PI/2, 0);
+			} else if (direction.x < 0) {
+				pacman.rotation.set(Math.PI/2, (4)*Math.PI/2, 0);
+			} else if (direction.y > 0) {
+				pacman.rotation.set(Math.PI/2, (3)*Math.PI/2, 0);
+			} else {
+				pacman.rotation.set(Math.PI/2, (5)*Math.PI/2, 0);
+			}
+		} else {
+			//makes sure Pacman faces the correct way.
+			pacman.rotation.set(Math.PI/2, 0, (direction+2)*Math.PI/2);
+		}
 	}
 	
 	
@@ -169,12 +189,17 @@ function drawing(canvas) {
 		return ghost;
 	}
 	
-	var ghosts = [
+	this.removeObject = function(obj3D) {
+		scene.remove(obj3D);
+	}
+	
+	
+	/*var ghosts = [
 		this.createGhost(0),
 		this.createGhost(1),
 		this.createGhost(2),
 		this.createGhost(3)
-	];
+	];*/
 	
 	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
 	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
@@ -195,7 +220,7 @@ function drawing(canvas) {
 	this.animate = function() {
 		requestAnimationFrame( this.animate.bind(this) );
 		
-		
+		/*
 		//Testing the Pacman drawing function.
 		this.drawPacman(TILE_SIZE*2.5, TILE_SIZE*2.5, Math.abs(testingPacmanAnimation), 0);
 		//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
@@ -203,10 +228,10 @@ function drawing(canvas) {
 		if (testingPacmanAnimation > 0.2) {
 			testingPacmanAnimation = -0.2;	
 		}
-		
+		*/
 		
 		//Testing the ghost drawing function.	
-			
+		/*	
 		this.drawGhost(testingGhostAnimation,TILE_SIZE*0.5,0);
 		this.drawGhost(testingGhostAnimation,TILE_SIZE*1.5,1);
 		this.drawGhost(testingGhostAnimation,TILE_SIZE*3.5,2);
@@ -215,30 +240,8 @@ function drawing(canvas) {
 		if (testingGhostAnimation > TILE_SIZE*MAP_SIZE_X) {
 			testingGhostAnimation = 0;	
 		}
-		
+		*/
 		renderer.render( scene, camera );
 	}
 	this.animate();
-	
-	/*
-    this.pellets = [];
-    this.pacman = undefined;
-    this.ghosts = [];
-	
-	
-    this.game_map = new map();
-    this.game_map.start();
-
-    for (var i = 0; i < this.game_map.tiles.length; i++) {
-        var p = this.game_map.tiles[i].get_pellets();
-        for (var j = 0; j < p.length; j++) {
-            if (j == 0 && this.game_map.check_corner(this.game_map.tiles[i])) {
-                this.pellets.push(new pellet(p[j], this.game_map.tile_size / 4, "power"));
-            }
-            else {
-                this.pellets.push(new pellet(p[j], this.game_map.tile_size / 4, "default"));
-            }
-        }
-    }
-	*/
 }

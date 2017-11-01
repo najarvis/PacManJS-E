@@ -1,8 +1,10 @@
 function Entity(pos) {
     this.pos = pos;
-    this.speed = 30 // in pixels per second
+    this.speed = 60 // in pixels per second
     this.vel = new vector2(0, 0);
     this.size = 5;
+	//The 3d drawing object to be associated with the entity.
+	this.drawingObject3D = null;
 
 };
 
