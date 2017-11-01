@@ -51,17 +51,19 @@ function game_handler() {
     this.game_map.start();
     this.last_frame = new Date();
 
+    // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
     this.pacman = new Pacman(this.game_map.tiles[0].get_center());
-    this.pacman.vel.y = 1;
 
-    for (var i = 0; i < this.game_map.tiles.length; i++) {
-        var p = this.game_map.tiles[i].get_pellets();
-        for (var j = 0; j < p.length; j++) {
-            if (j == 0 && this.game_map.check_corner(this.game_map.tiles[i])) {
-                this.pellets.push(new Pellet(p[j], "power"));
-            }
-            else {
-                this.pellets.push(new Pellet(p[j], "default"));
+    this.generate_pellets = function() {
+        for (var i = 0; i < this.game_map.tiles.length; i++) {
+            var p = this.game_map.tiles[i].get_pellets();
+            for (var j = 0; j < p.length; j++) {
+                if (j == 0 && this.game_map.check_corner(this.game_map.tiles[i])) {
+                    this.pellets.push(new Pellet(p[j], "power"));
+                }
+                else {
+                    this.pellets.push(new Pellet(p[j], "default"));
+                }
             }
         }
     }
@@ -89,6 +91,11 @@ function game_handler() {
             }
             console.log(this.score);
             this.pellets.splice(eaten[i], 1);
+        }
+
+        if (this.pellets.length == 0) {
+            this.game_map.start();
+            this.generate_pellets();
         }
     }
 
