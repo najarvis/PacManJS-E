@@ -69,7 +69,8 @@ function game_handler() {
             drawingThing.drawPellet(this.pellets[i]);
         }
         
-                
+		//Clear the tiles before starting.
+		drawingThing.clearTiles();
         //Draw the tiles in the 3D space.
         for (var i = 0; i < this.game_map.tiles.length; i++) {
             drawingThing.drawTile(this.game_map.tiles[i]);

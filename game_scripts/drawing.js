@@ -94,6 +94,15 @@ function drawing(canvas) {
     }
 	
 	
+	 /** Removes all of the tiles from the scene.
+	   */
+	this.clearTiles = function() {
+		for (i=0; i<tiles.length; i++) {
+			scene.remove(tiles[i]);
+		}
+		tiles = [];
+	}
+	
 	
 	 /** Draws a pellet. This method should only be called once.
 	   * @param pellet the pellet to draw.
