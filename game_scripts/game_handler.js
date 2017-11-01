@@ -91,12 +91,12 @@ function game_handler() {
         for (var i = 0; i < eaten.length; i++) {
             if (this.pellets[eaten[i]].type == "default") {
                 this.score += 10;
-				//Remove the 3D object representing the pellet from the 3d view.
-				drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
             } else {
                 this.score += 50;
                 // Power pellet code should go here.
             }
+			//Remove the 3D object representing the pellet from the 3d view.
+			drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
             console.log(this.score);
             this.pellets.splice(eaten[i], 1);
         }
@@ -122,7 +122,7 @@ function game_handler() {
 
         this.pacman.draw(ctx);
 		//Draw in 3D.
-		drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), 0);
+		drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
 		//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
 		testingPacmanAnimation += 0.02;
 		if (testingPacmanAnimation > 0.2) {

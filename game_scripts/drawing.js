@@ -127,7 +127,6 @@ function drawing(canvas) {
 	//Holds the "mesh" object that represents Pacman.
 	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16);
 	var pacman = new THREE.Mesh( pacmanGeometry, pacmanMaterial );
-	//pacman.rotateX(Math.PI/2);
 	scene.add( pacman );
 	
 	
@@ -143,8 +142,21 @@ function drawing(canvas) {
 		pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
 		pacman.geometry = pacmanGeometry;
 		pacman.position.set( x, y, 0 );
-		//makes sure Pacman faces the correct way.
-		pacman.rotation.set(Math.PI/2, 0, (direction+2)*Math.PI/2);
+		if (direction.x != undefined) {
+			//makes sure Pacman faces the correct way.
+			if (direction.x > 0) {
+				pacman.rotation.set(Math.PI/2, (2)*Math.PI/2, 0);
+			} else if (direction.x < 0) {
+				pacman.rotation.set(Math.PI/2, (4)*Math.PI/2, 0);
+			} else if (direction.y > 0) {
+				pacman.rotation.set(Math.PI/2, (3)*Math.PI/2, 0);
+			} else if (direction.y < 0) {
+				pacman.rotation.set(Math.PI/2, (5)*Math.PI/2, 0);
+			}
+		} else {
+			//makes sure Pacman faces the correct way.
+			pacman.rotation.set(Math.PI/2, 0, (direction+2)*Math.PI/2);
+		}
 	}
 	
 	
@@ -179,12 +191,12 @@ function drawing(canvas) {
 	}
 	
 	
-	var ghosts = [
+	/*var ghosts = [
 		this.createGhost(0),
 		this.createGhost(1),
 		this.createGhost(2),
 		this.createGhost(3)
-	];
+	];*/
 	
 	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
 	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
