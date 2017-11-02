@@ -7,9 +7,10 @@ MAP_SIZE_Y = 10;
 PELLET_SIZE = 3;
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
-DRAW_3D = false;
+DRAW_3D = true;
+var drawingThing;
 if (DRAW_3D) {
-    var drawingThing = new drawing(document.getElementById("canvas3d"));
+    drawingThing = new drawing(document.getElementById("canvas3d"));
 }
 
 //Equivilant of the "main" function of javascript.
