@@ -8,22 +8,22 @@ Pacman.prototype.constructor = Pacman;
 Pacman.prototype.update = function(map, time_delta, input, entities) {
     // Handle user input
     //var pos = this.vel;
-    if (input[87]){ // W
+    if (input[87] || input[38]){ // W
         this.vel.y = -1;
         this.vel.x = 0;
         //pos = pos.add(new vector2(0, -1));
     }
-    if (input[83]){ // S
+    if (input[83] || input[40]){ // S
         this.vel.y = 1;
         this.vel.x = 0;
         //pos = pos.add(new vector2(0, 1));
     }
-    if (input[65]){ // A
+    if (input[65] || input[37]){ // A
         this.vel.x = -1;
         this.vel.y = 0;
         //pos = pos.add(new vector2(-1, 0));
     }
-    if (input[68]){ // D
+    if (input[68] || input[39]){ // D
         this.vel.x = 1;
         this.vel.y = 0;
         //pos = pos.add(new vector2(1, 0));

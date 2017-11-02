@@ -24,26 +24,26 @@ Entity.prototype.draw = function(ctx) {
 };
 
 Entity.prototype.valid_pos = function(map) {
-    var TOLERANCE = 3;
+    var TOLERANCE = 5;
     curr_tile = map.get_tile_pos(this.pos);
     if (curr_tile != undefined) {
         if (this.vel.x != 0) {
             // On center line
-            if (this.pos.y - (curr_tile.position.y + curr_tile.size / 2) <= TOLERANCE && !this.in_wall(curr_tile)) {
+            if (Math.abs(this.pos.y - (curr_tile.position.y + curr_tile.size / 2)) <= TOLERANCE && !this.in_wall(curr_tile)) {
                 this.pos.y = curr_tile.position.y + curr_tile.size / 2;
                 return true;
             }
         }
         else if (this.vel.y != 0) {
             // on center line
-            if (this.pos.x - (curr_tile.position.x + curr_tile.size / 2) <= TOLERANCE && !this.in_wall(curr_tile)) {
+            if (Math.abs(this.pos.x - (curr_tile.position.x + curr_tile.size / 2)) <= TOLERANCE && !this.in_wall(curr_tile)) {
                 this.pos.x = curr_tile.position.x + curr_tile.size / 2;
                 return true;
             }
         }
         else {
-            return (this.pos.x - (curr_tile.position.x + curr_tile.size / 2) <= TOLERANCE ||
-                    this.pos.y - (curr_tile.position.y + curr_tile.size / 2) <= TOLERANCE);
+            return (Math.abs(this.pos.x - (curr_tile.position.x + curr_tile.size / 2)) <= TOLERANCE ||
+                    Math.abs(this.pos.y - (curr_tile.position.y + curr_tile.size / 2)) <= TOLERANCE);
         }
 
     }
@@ -78,4 +78,4 @@ Entity.prototype.in_wall = function(tile) {
 
 Entity.prototype.check_collision = function(other_entity) {
     return this.pos.distanceTo(other_entity.pos) < this.size + other_entity.size;
-}
+};

@@ -7,8 +7,11 @@ MAP_SIZE_Y = 10;
 PELLET_SIZE = 3;
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
+DRAW_3D = false;
+if (DRAW_3D) {
+    var drawingThing = new drawing(document.getElementById("canvas3d"));
+}
 
-var drawingThing = new drawing(document.getElementById("canvas3d"));
 //Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
@@ -22,6 +25,7 @@ $(document).ready(function() {
     var KEYS = [];
     window.addEventListener('keydown', function(e) {
         KEYS[e.keyCode] = true;
+        console.log(e.keyCode);
     });
 
     window.addEventListener('keyup', function(e) {
@@ -65,15 +69,17 @@ function game_handler() {
             }
 			//Draw the pellet in the 3D plane.
         }
-        for (var i = 0; i < this.pellets.length; i++) {
-            drawingThing.drawPellet(this.pellets[i]);
-        }
-        
-		//Clear the tiles before starting.
-		drawingThing.clearTiles();
-        //Draw the tiles in the 3D space.
-        for (var i = 0; i < this.game_map.tiles.length; i++) {
-            drawingThing.drawTile(this.game_map.tiles[i]);
+        if (DRAW_3D) {
+            for (var i = 0; i < this.pellets.length; i++) {
+                drawingThing.drawPellet(this.pellets[i]);
+            }
+            
+            //Clear the tiles before starting.
+            drawingThing.clearTiles();
+            //Draw the tiles in the 3D space.
+            for (var i = 0; i < this.game_map.tiles.length; i++) {
+                drawingThing.drawTile(this.game_map.tiles[i]);
+            }
         }
     }
 	
@@ -100,7 +106,9 @@ function game_handler() {
                 // Power pellet code should go here.
             }
 			//Remove the 3D object representing the pellet from the 3d view.
-			drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
+            if (DRAW_3D) {
+                drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
+            }
             console.log(this.score);
             this.pellets.splice(eaten[i], 1);
         }
@@ -131,11 +139,13 @@ function game_handler() {
 
         this.pacman.draw(ctx);
 		//Draw in 3D.
-		drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
-		//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
-		testingPacmanAnimation += 0.02;
-		if (testingPacmanAnimation > 0.2) {
-			testingPacmanAnimation = -0.2;	
-		}
+        if (DRAW_3D) {
+            drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
+        }
+        //The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
+        testingPacmanAnimation += 0.02;
+        if (testingPacmanAnimation > 0.2) {
+            testingPacmanAnimation = -0.2;	
+        }
     }
 }
