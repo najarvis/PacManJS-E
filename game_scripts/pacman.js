@@ -5,6 +5,13 @@ function Pacman(pos) {
 Pacman.prototype = Object.create(Entity.prototype);
 Pacman.prototype.constructor = Pacman;
 
+
+ /** Handles updating the "pacman" class every frame.
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   */
 Pacman.prototype.update = function(map, time_delta, input, entities) {
     // Handle user input
     //var pos = this.vel;
@@ -29,6 +36,8 @@ Pacman.prototype.update = function(map, time_delta, input, entities) {
         //pos = pos.add(new vector2(1, 0));
     }
     //this.vel = pos;
+	
+	console.log("Pacman position: "+this.pos.x+","+this.pos.y);
 
     old_pos = this.pos;
     this.pos = this.pos.add(this.vel.mul(this.speed * time_delta));

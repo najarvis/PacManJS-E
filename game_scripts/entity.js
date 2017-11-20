@@ -23,8 +23,32 @@ Entity.prototype.draw = function(ctx) {
     ctx.fill();
 };
 
-Entity.prototype.valid_pos = function(map) {
-    var TOLERANCE = 5;
+ /** Gets the next valid postion given the given position, speed, and "desired direction".
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   */
+Entity.prototype.valid_pos = function(map, currentPosition, currentSpeed, potentialSpeed) {
+	if (currentPosition == undefined || currentPosition == null) {
+		currentPosition = this.pos;
+	}
+	if (currentSpeed == undefined || currentSpeed == null) {
+		currentSpeed = this.vel;
+	}
+	
+	//Stores the current tile.
+    var currentTile = map.get_tile_pos(currentPosition);
+	
+	//In thos case, see if the object can move in the potential direction.
+	if (potentialDirection != undefined) {
+		
+		
+	}
+	
+	
+	
+    /*var TOLERANCE = 5;
     curr_tile = map.get_tile_pos(this.pos);
     if (curr_tile != undefined) {
         if (this.vel.x != 0) {
@@ -48,6 +72,7 @@ Entity.prototype.valid_pos = function(map) {
 
     }
     return false;
+	*/
 };
 
 Entity.prototype.in_wall = function(tile) {
