@@ -7,7 +7,7 @@ MAP_SIZE_Y = 10;
 PELLET_SIZE = 3;
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
-DRAW_3D = true;
+DRAW_3D = false;
 var drawingThing;
 if (DRAW_3D) {
     drawingThing = new drawing(document.getElementById("canvas3d"));
@@ -45,13 +45,21 @@ $(document).ready(function() {
 function game_handler() {
 	
     this.pellets = [];
-    this.ghosts = [];
     this.score = 0;
+    this.high_score = 0;
     this.lives = 3;
 	
     this.game_map = new map();
     this.game_map.start();
     this.last_frame = new Date();
+    
+    var GHOSTS_ENABLE = true;
+    this.ghosts = [];
+
+    if (GHOSTS_ENABLE) {
+        this.ghosts = [new Ghost(this.game_map.tiles[1].get_center()),
+                       new Ghost(this.game_map.tiles[this.game_map.tiles.length-1].get_center())];
+    }
 
     // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
     this.pacman = new Pacman(this.game_map.tiles[0].get_center());
@@ -92,6 +100,34 @@ function game_handler() {
 
         this.pacman.update(this.game_map, delta, input);
 
+        var hit = false;
+        for (var i = 0;i < this.ghosts.length; i++) {
+            this.ghosts[i].update(this.game_map, this.pacman.pos, delta);
+            if (this.pacman.check_collision(this.ghosts[i])) {
+                hit = true;
+            }
+        }
+
+        // Hit by a ghost
+        if (hit) {
+            this.lives -= 1;
+            this.pacman.pos = this.pacman.start_pos;
+            for (var i = 0; i < this.ghosts.length; i++) {
+                this.ghosts[i].pos = this.ghosts[i].start_pos;
+            }
+
+            // All out of lives. Start new game.
+            if (this.lives == 0) {
+                console.log("Final score: " + this.score);
+                this.game_map.start();
+                this.pellets = [];
+                this.generate_pellets();
+                this.score = 0;
+                this.lives = 3;
+            }
+        }
+
+        // handle pellet collision
         eaten = [];
         for (var i = 0; i < this.pellets.length; i++) {
             if(this.pacman.check_collision(this.pellets[i])) {
@@ -99,6 +135,7 @@ function game_handler() {
             }
         }
 
+        // Go through all the eaten pellets in a separate loop.
         for (var i = 0; i < eaten.length; i++) {
             if (this.pellets[eaten[i]].type == "default") {
                 this.score += 10;
@@ -106,6 +143,8 @@ function game_handler() {
                 this.score += 50;
                 // Power pellet code should go here.
             }
+            if (this.score > this.high_score) { this.high_score = this.score; }
+
 			//Remove the 3D object representing the pellet from the 3d view.
             if (DRAW_3D) {
                 drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
@@ -113,11 +152,23 @@ function game_handler() {
             console.log(this.score);
             this.pellets.splice(eaten[i], 1);
         }
-
+        
+        // No pellets remaining? New map!
         if (this.pellets.length == 0) {
             this.game_map.start();
             this.generate_pellets();
+
+            this.pacman.pos = this.pacman.start_pos;
+            for (var i = 0; i < this.ghosts.length; i++) {
+                this.ghosts[i].pos = this.ghosts[i].start_pos;
+            }
         }
+
+        // Update game info at the top.
+        document.getElementById('score').innerHTML = this.score;
+        document.getElementById('h_score').innerHTML = this.high_score;
+        document.getElementById('lives').innerHTML = this.lives;
+
     }
 
 	

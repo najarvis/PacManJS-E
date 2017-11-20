@@ -1,10 +1,12 @@
 function Entity(pos) {
     this.pos = pos;
+    this.start_pos = pos;
     this.speed = 60 // in pixels per second
     this.vel = new vector2(0, 0);
     this.size = 5;
 	//The 3d drawing object to be associated with the entity.
 	this.drawingObject3D = null;
+    this.color = "#00DDFF";
 
 };
 
@@ -17,7 +19,7 @@ Entity.prototype.update = function(map, time_delta) {
 };
 
 Entity.prototype.draw = function(ctx) {
-    ctx.fillStyle = "#00DDFF";
+    ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.pos.x, this.pos.y, this.size, 0, 360);
     ctx.fill();
