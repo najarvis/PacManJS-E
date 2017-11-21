@@ -42,4 +42,9 @@ function vector2(x, y) {
 		return "vector2(" + String(this.x) + ", " + String(this.y) + ")";
 	}
 
+	// Gets the dot product of 2 vectors.
+	this.dotProduct = function(vector) {
+		return this.x * vector.x + this.y * vector.y;
+	}
+
 }
