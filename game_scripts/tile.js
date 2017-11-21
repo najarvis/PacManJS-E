@@ -106,4 +106,26 @@ function tile(position, top_e, right_e, bottom_e, left_e, size) {
     this.get_center = function() {
         return this.position.add(new vector2(this.size / 2, this.size / 2));
     }
+	
+	 /** The vector can point left, right, up, or down. If it is pointing in a free direction,
+	   * Return true. else return false.
+	   * @param vector The vector to use.
+	   * @return Whether it is pointing in a free direction.
+	   */
+	this.isVectorPointingInEmptyDirection = function(vector) {
+		if (vector.x > 0) {
+			return this.right_empty;
+		}
+		if (vector.x < 0) {
+			return this.left_empty;
+		}
+		if (vector.y < 0) {
+			return this.top_empty;
+		}
+		if (vector.y > 0) {
+			return this.bottom_empty;
+		}
+		//If it is (0,0)
+		return false;
+	}
 }
