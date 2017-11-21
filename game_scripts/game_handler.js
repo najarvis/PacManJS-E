@@ -7,7 +7,7 @@ MAP_SIZE_Y = 10;
 PELLET_SIZE = 3;
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
-DRAW_3D = false;
+DRAW_3D = true;
 var drawingThing;
 if (DRAW_3D) {
     drawingThing = new drawing(document.getElementById("canvas3d"));
@@ -81,6 +81,10 @@ function game_handler() {
         if (DRAW_3D) {
             for (var i = 0; i < this.pellets.length; i++) {
                 drawingThing.drawPellet(this.pellets[i]);
+            }
+			
+            for (var i = 0; i < this.ghosts.length; i++) {
+                drawingThing.drawGhost(this.ghosts[i]);
             }
             
             //Clear the tiles before starting.
@@ -193,6 +197,10 @@ function game_handler() {
 		//Draw in 3D.
         if (DRAW_3D) {
             drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
+            for (var i = 0; i < this.ghosts.length; i++) {
+                drawingThing.drawGhost(this.ghosts[i]);
+            }
+			
         }
         //The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
         testingPacmanAnimation += 0.02;

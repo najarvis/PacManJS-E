@@ -52,7 +52,7 @@ function drawing(canvas) {
 		scene.add( cube );
 	}
 	
-	this.drawDebugCube(1);
+	//this.drawDebugCube(1);
 	
 	
 	 /** Draws a tile. This method should only be called once.
@@ -210,15 +210,14 @@ function drawing(canvas) {
 		this.createGhost(3)
 	];*/
 	
-	 /** Draws Pacman at the given locaiton with the mouth open the specified amount. This amount
-	   * can range from 0 for closed, to 0.2 for open, to 1 for the "dead animation".
-	   * @param x The x-position of Pacman.
-	   * @param y The y-position of Pacman.
-	   * @param ghostNumber The ghost to move. Ranges from 0 to 3 for Blinky, Inky, Pinky, and Clyde.
-	   * @param blue Whether the ghost is blue and afraid.
+	 /** Draws the given ghost. Creates a 3d version if it doesn't exist.
+	   * @param ghost The ghost to draw.
 	   */
-	this.drawGhost = function(x, y, ghostNumber, blue) {
-		ghosts[ghostNumber].position.set( x, y, 0 );
+	this.drawGhost = function(ghost) {
+		if (ghost.drawingObject3D == undefined || ghost.drawingObject3D == null) {
+			ghost.drawingObject3D = this.createGhost(1);
+		}
+		ghost.drawingObject3D.position.set( ghost.pos.x, ghost.pos.y, 0 );
 	}
 	
 	
