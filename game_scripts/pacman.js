@@ -1,6 +1,7 @@
 function Pacman(pos) {
     Entity.call(this, pos);
-	this.requestedVel = new vector2(0,0);
+    this.requestedVel = new vector2(0,0);
+    this.color = "#FFDD00";
 };
 
 Pacman.prototype = Object.create(Entity.prototype);
