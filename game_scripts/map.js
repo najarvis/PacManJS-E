@@ -95,6 +95,7 @@ function map() {
             }
             if (i <= max_i) break;
         }
+		//End the loop.
 
         console.log("Going into the fill algorithm...");
         // Fill algorithm
@@ -196,8 +197,14 @@ function map() {
                 }
             }
         }
+		//End the fill algorithm.
+		
+		//Make the starting area.
+		//console.log(Math.floor(MAP_SIZE_Y/2));
+		var lefttile = this.get_tile(Math.floor(MAP_SIZE_X/2), Math.floor(MAP_SIZE_X/2));
 
     }
+	//End this.start().
 
     this.draw = function(ctx) {
         for (var i = 0; i < this.tiles.length; i++) {
