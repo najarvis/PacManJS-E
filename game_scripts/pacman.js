@@ -39,9 +39,9 @@ Pacman.prototype.update = function(map, time_delta, input, entities) {
     }
     //this.vel = pos;
 	
-	console.log("Pacman position: "+this.pos.x+","+this.pos.y+
+	/*console.log("Pacman position: "+this.pos.x+","+this.pos.y+
 			" Vel: "+this.vel.x+","+this.vel.y+" Requested: "+
-			this.requestedVel.x+","+this.requestedVel.y);
+			this.requestedVel.x+","+this.requestedVel.y);*/
 
     //old_pos = this.pos;
 	var validPos = this.valid_pos2(map, this.pos,

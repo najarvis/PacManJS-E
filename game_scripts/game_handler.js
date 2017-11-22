@@ -79,6 +79,9 @@ function game_handler() {
 			//Draw the pellet in the 3D plane.
         }
         if (DRAW_3D) {
+            //Clear the tiles before starting.
+            drawingThing.clearTiles();
+			
             for (var i = 0; i < this.pellets.length; i++) {
                 drawingThing.drawPellet(this.pellets[i]);
             }
@@ -87,8 +90,6 @@ function game_handler() {
                 drawingThing.drawGhost(this.ghosts[i]);
             }
             
-            //Clear the tiles before starting.
-            drawingThing.clearTiles();
             //Draw the tiles in the 3D space.
             for (var i = 0; i < this.game_map.tiles.length; i++) {
                 drawingThing.drawTile(this.game_map.tiles[i]);
@@ -101,6 +102,13 @@ function game_handler() {
         var new_frame = new Date();
         var delta = (new_frame - this.last_frame) / 1000;
         this.last_frame = new_frame;
+		
+		//Prevents too large of a gap between frames. Large gaps like
+		//this can cause entities to phase through walls.
+		//console.log("Time Delta: "+delta);
+		if (delta > 0.1) {
+			delta = 0.1;
+		}
 
         this.pacman.update(this.game_map, delta, input);
 

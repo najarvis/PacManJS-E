@@ -94,13 +94,17 @@ function drawing(canvas) {
     }
 	
 	
-	 /** Removes all of the tiles from the scene.
+	 /** Removes all of the tiles and entities from the scene.
+	   * Used when the level is regenerated.
 	   */
 	this.clearTiles = function() {
 		for (i=0; i<tiles.length; i++) {
 			scene.remove(tiles[i]);
 		}
-		tiles = [];
+		for (i=0; i<entities.length; i++) {
+			scene.remove(entities[i]);
+		}
+		entities = [];
 	}
 	
 	
@@ -216,6 +220,7 @@ function drawing(canvas) {
 	this.drawGhost = function(ghost) {
 		if (ghost.drawingObject3D == undefined || ghost.drawingObject3D == null) {
 			ghost.drawingObject3D = this.createGhost(1);
+			//entities.push(ghost.drawingObject3D);
 		}
 		ghost.drawingObject3D.position.set( ghost.pos.x, ghost.pos.y, 0 );
 	}

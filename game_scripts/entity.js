@@ -115,7 +115,7 @@ Entity.prototype.valid_pos2 = function(map, currentPosition, currentSpeed, poten
 		//Only execute the case if the potential direction is different from the 
 		//current direction, and if the potential direction isn't zero.
 		if ((potentialSpeed.x != currentSpeed.x || potentialSpeed.y != currentSpeed.y) && (potentialSpeed.x != 0 || potentialSpeed.y != 0)) {
-			console.log("Trying case 2:");
+			//console.log("Trying case 2:");
 			
 			//First, we must see if the box made from the postion, and the
 			//sum of the current/poential directions contains the center of a tile (16,16).
@@ -146,7 +146,7 @@ Entity.prototype.valid_pos2 = function(map, currentPosition, currentSpeed, poten
 			if (left <= TILE_SIZE/2 && right >= TILE_SIZE/2 && top <= TILE_SIZE/2 && bottom >= TILE_SIZE/2) {
 				//If it is, then check if the requested direction is possible...
 				if (currentTile.isVectorPointingInEmptyDirection(potentialSpeed)) {
-					console.log("Suceeded case 2");
+					//console.log("Suceeded case 2");
 					return {
 						"status": 2,
 						"newPosition": new vector2(currentTile.position.x+TILE_SIZE/2+potentialSpeed.x, currentTile.position.y+TILE_SIZE/2+potentialSpeed.y)
@@ -160,7 +160,7 @@ Entity.prototype.valid_pos2 = function(map, currentPosition, currentSpeed, poten
 	//First, check if the speed is pointing toward an open direction.
 	//In this case, the movement is good.
 	if (currentTile.isVectorPointingInEmptyDirection(currentSpeed)) {
-		console.log("Suceeded case 1 trial 1");
+		//console.log("Suceeded case 1 trial 1");
 		return {
 			"status": 1,
 			"newPosition": currentPosition.add(currentSpeed)
@@ -176,14 +176,14 @@ Entity.prototype.valid_pos2 = function(map, currentPosition, currentSpeed, poten
 		
 		//Check if the position is valid.
 		if (currentTile.isVectorPointingInEmptyDirection(vectorRepresentingNewPosition)) {
-			console.log("Suceeded case 1 trial 2");
+			//console.log("Suceeded case 1 trial 2");
 			return {
 				"status": 1,
 				"newPosition": currentPosition.add(currentSpeed)
 			};
 		} else {
 			//If not in a valid position, the offending object should be moved to the center fo the tile.
-			console.log("Failed case 0");
+			//console.log("Failed case 0");
 			return {
 				"status": 0,
 				"newPosition": new vector2(currentTile.position.x+TILE_SIZE/2,currentTile.position.y+TILE_SIZE/2)
