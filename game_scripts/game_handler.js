@@ -57,8 +57,10 @@ function game_handler() {
     this.ghosts = [];
 
     if (GHOSTS_ENABLE) {
-        this.ghosts = [new Ghost(this.game_map.tiles[1].get_center()),
-                       new Ghost(this.game_map.tiles[this.game_map.tiles.length-1].get_center())];
+        this.ghosts = [new Ghost(this.game_map.tiles[1].get_center(),0),
+                       new Ghost(this.game_map.tiles[this.game_map.tiles.length-1].get_center(),1),
+					   new Ghost(this.game_map.tiles[3].get_center(),2),
+					   new Ghost(this.game_map.tiles[this.game_map.tiles.length-2].get_center(),3)];
     }
 
     // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
@@ -114,7 +116,7 @@ function game_handler() {
 
         var hit = false;
         for (var i = 0;i < this.ghosts.length; i++) {
-            this.ghosts[i].update(this.game_map, this.pacman.pos, delta);
+            this.ghosts[i].update(this.game_map, this.pacman, delta);
             if (this.pacman.check_collision(this.ghosts[i])) {
                 hit = true;
             }

@@ -1,19 +1,66 @@
-function Ghost(pos) {
+
+
+ /** Constructor for the ghost.
+   * @param pos The position of the ghost.
+   * @param type Which ghost it is. 0 = Clyde (Orange), 1 = Blinky (Red), 2 = Pinky (Pink), 3 = Inky (Blue)
+   * @param map The game map to check valid positions on.
+   * @param map The game map to check valid positions on.
+   */
+function Ghost(pos, type) {
     Entity.call(this, pos);
+	this.type = type;
     this.requestedVel = new vector2(0,0);
 };
 
 Ghost.prototype = Object.create(Entity.prototype);
 Ghost.prototype.constructor = Ghost;
 
-Ghost.prototype.update = function(map, pacman_pos, delta) {
-    // This just goes in general to pacman.
-    var goal_x = pacman_pos.x - this.pos.x;
-    var goal_y = pacman_pos.y - this.pos.y;
-    var norm_x = goal_x == 0 ? 0 : goal_x / Math.abs(goal_x);
-    var norm_y = goal_y == 0 ? 0 : goal_y / Math.abs(goal_y);
+Ghost.prototype.update = function(map, pacman, delta) {
+	
+	//This code determines which point the ghost targets.
+	if (this.type == 0) {	
+		//The behavior of Clyde alternates between the behavior of
+		//Blinky the red ghost (see below) and movement
+		//towards the lower-left corner of the screen.
+		if (Math.random() > 0.5) {
+			var goal_x = pacman.pos.x - this.pos.x;
+			var goal_y = pacman.pos.y - this.pos.y;
+		} else {
+			var goal_x = -1;
+			var goal_y = 1;
+		}
+	} else if (this.type == 1) {
+		//The behavior of Blinky is to actively chase Pac-Man.
+		var goal_x = pacman.pos.x - this.pos.x;
+		var goal_y = pacman.pos.y - this.pos.y;
+	} else if (this.type == 2) {
+		//The behavior of Pinky is to aim for a position in front of Pac-Man.
+		var goal_x = pacman.pos.x+ pacman.vel.x*TILE_SIZE*2 - this.pos.x;
+		var goal_y = pacman.pos.y + pacman.vel.x*TILE_SIZE*2 - this.pos.y;
+	} else if (this.type == 3) {
+		// The behavior of Inky is to randomly switch between chasing and running away from Pac-Man.
+		var goal_x = pacman.pos.x - this.pos.x;
+		var goal_y = pacman.pos.y - this.pos.y;
+		
+		//Randomly switch to running away by multiplying by -1.
+		if (Math.random() > 0.5) {
+			goal_x = -goal_x;
+			goal_y = -goal_y;
+		}
+	}
+	//Sets the goal directions so that they are 0, 1, or -1.
+	var norm_x = goal_x == 0 ? 0 : goal_x / Math.abs(goal_x);
+	var norm_y = goal_y == 0 ? 0 : goal_y / Math.abs(goal_y);
+	
+	
+	
+	
 	
     //console.log(parseInt(goal_x), parseInt(goal_y), norm_x, norm_y);
+	
+	
+	//The following code actually makes the ghost move toward the target.
+	
 	
     // Desire to move in a different axis than the one you already are moving in.
 	if (this.vel.y == 0) {

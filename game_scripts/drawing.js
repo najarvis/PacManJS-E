@@ -16,11 +16,13 @@ function drawing(canvas) {
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
 	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
 	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00, side: THREE.DoubleSide } );
+	//Determines the colors of the ghosts.
+	//0 = Clyde (Orange), 1 = Blinky (Red), 2 = Pinky (Pink), 3 = Inky (Blue)
 	var ghostMaterials = [
+		new THREE.MeshStandardMaterial( { color: 0xff8800} ),
 		new THREE.MeshStandardMaterial( { color: 0xff0000} ),
-		new THREE.MeshStandardMaterial( { color: 0x00ffff} ),
 		new THREE.MeshStandardMaterial( { color: 0xff8888} ),
-		new THREE.MeshStandardMaterial( { color: 0xff8800} )
+		new THREE.MeshStandardMaterial( { color: 0x00ffff} )
 	];
 	
 	
@@ -219,7 +221,7 @@ function drawing(canvas) {
 	   */
 	this.drawGhost = function(ghost) {
 		if (ghost.drawingObject3D == undefined || ghost.drawingObject3D == null) {
-			ghost.drawingObject3D = this.createGhost(1);
+			ghost.drawingObject3D = this.createGhost(ghost.type);
 			//entities.push(ghost.drawingObject3D);
 		}
 		ghost.drawingObject3D.position.set( ghost.pos.x, ghost.pos.y, 0 );
