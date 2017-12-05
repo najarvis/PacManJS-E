@@ -5,9 +5,11 @@ TILE_SIZE = 32;
 MAP_SIZE_X = 10;
 MAP_SIZE_Y = 10;
 PELLET_SIZE = 3;
+
 // changing this from true to false will remove the red lines surrounding the tiles.
 DEBUG = false;
 DRAW_3D = true;
+DRAW_2D = false;
 var drawingThing;
 if (DRAW_3D) {
     drawingThing = new drawing(document.getElementById("canvas3d"));
@@ -18,8 +20,13 @@ var gh;
 //Equivilant of the "main" function of javascript.
 $(document).ready(function() {
     var canvas = document.getElementById('canvas');
-    canvas.width = TILE_SIZE*MAP_SIZE_X//$(window).width();
-    canvas.height = TILE_SIZE*MAP_SIZE_Y//$(window).height();
+
+    if (!DRAW_2D) {
+    	canvas.hidden = true;
+    }
+
+    canvas.width = TILE_SIZE * MAP_SIZE_X;
+    canvas.height = TILE_SIZE * MAP_SIZE_Y;
 
     var context = canvas.getContext("2d");
 	
@@ -27,8 +34,10 @@ $(document).ready(function() {
 
     var KEYS = [];
     window.addEventListener('keydown', function(e) {
+    	if (e.keyCode == 32) {
+    		gh.status = -gh.status;
+    	}
         KEYS[e.keyCode] = true;
-		//console.log(e.keyCode);
     });
 
     window.addEventListener('keyup', function(e) {
@@ -48,7 +57,30 @@ function game_handler() {
 	
     this.pellets = [];
     this.score = 0;
-    this.high_score = 0;
+    
+    // Pull the high score table from the server.
+    let hs_data = null;
+    $.ajax({
+    	url: '/get_high_scores',
+    	type: 'get',
+    	dataType: 'json',
+    	async: false,
+    	success: function(res) {
+	     	let s = res.scores;
+	    	let highest = {"name": "null", "score": 0};
+
+	    	for (let i = 0; i < s.length; i++) {
+	    		if (s[i].score > highest.score) {
+	    			highest = s[i];
+	    		}
+	    	}
+	    	hs_data = highest;
+    	}
+    });
+
+    this.high_score = hs_data.score;
+    this.hs_name = hs_data.name;
+
     this.lives = 3;
 	this.level = 0;
 	//1 = playing, 2 = ready, 3 = dying.
@@ -66,20 +98,15 @@ function game_handler() {
     this.ghosts = [];
 
     if (GHOSTS_ENABLE) {
-        this.ghosts = [new Ghost(this.game_map.tiles[MAP_SIZE_X+2].get_center(),0),
-                       new Ghost(this.game_map.tiles[MAP_SIZE_X*(MAP_SIZE_Y-2)+2].get_center(),1),
-					   new Ghost(this.game_map.tiles[MAP_SIZE_X+3].get_center(),2),
-					   new Ghost(this.game_map.tiles[MAP_SIZE_X*(MAP_SIZE_Y-2)+3].get_center(),3)];
+        this.ghosts = [new Ghost(this.game_map.tiles[MAP_SIZE_X + 2].get_center(),0),
+                       new Ghost(this.game_map.tiles[MAP_SIZE_X * (MAP_SIZE_Y - 2) + 2].get_center(), 1),
+					   new Ghost(this.game_map.tiles[MAP_SIZE_X + 3].get_center(), 2),
+					   new Ghost(this.game_map.tiles[MAP_SIZE_X * (MAP_SIZE_Y - 2) + 3].get_center(), 3)];
     }
 
-    // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
-    this.pacman = new Pacman(this.game_map.tiles[MAP_SIZE_X*MAP_SIZE_Y/2+MAP_SIZE_X-1].get_center());
-    //this.generate_pellets();
-	
-	
-	
-	
-	
+    // Start pacman in the center
+    this.pacman = new Pacman(this.game_map.tiles[MAP_SIZE_X * MAP_SIZE_Y / 2 + MAP_SIZE_X - 1].get_center());
+
 	
     this.generate_pellets = function() {
         for (var i = 0; i < this.game_map.tiles.length; i++) {
@@ -152,6 +179,37 @@ function game_handler() {
 				// All out of lives. Start new game.
 				if (this.lives == 0) {
 					console.log("Final score: " + this.score);
+					if (this.score > this.high_score) { 
+						this.high_score = this.score;
+						console.log("New high score!");
+						this.hs_name = prompt("New high score! What is your name?");
+
+						// UPDATE HIGH SCORE TABLE HERE.
+						let temp_scores = null;
+					    $.ajax({
+					    	url: '/get_high_scores',
+					    	type: 'get',
+					    	dataType: 'json',
+					    	async: false,
+					    	success: function(res) {
+						     	temp_scores = res;
+						    }
+					    });
+
+					    let hs = this.high_score;
+					    let hsn = this.hs_name;
+					    temp_scores.scores.push({"name": hsn, "score": hs});
+
+					    $.ajax({
+					    	url: '/update_high_scores',
+					    	type: 'post',
+					    	data: JSON.stringify(temp_scores),
+					    	contentType: "application/json; charset=utf-8",
+					    	dataType: "json",
+					    	success: function(data) {console.log(data);}
+					    });
+
+					}
 					this.game_map.start();
 					this.pellets = [];
 					this.generate_pellets();
@@ -206,7 +264,6 @@ function game_handler() {
 						this.ghosts[j].makeScared(15-this.level*3);
 					}
 				}
-				if (this.score > this.high_score) { this.high_score = this.score; }
 
 				//Remove the 3D object representing the pellet from the 3d view.
 				if (DRAW_3D) {
@@ -232,15 +289,11 @@ function game_handler() {
 
 		// Update game info at the top.
 		document.getElementById('score').innerHTML = this.score;
-		document.getElementById('h_score').innerHTML = this.high_score;
+		document.getElementById('h_score').innerHTML = this.hs_name + " - " + this.high_score;
 		document.getElementById('lives').innerHTML = this.lives;
 		document.getElementById('level').innerHTML = this.level;
 
     }
-
-	
-	
-	
 	
 	//Used for Pacman animation.
 	var testingPacmanAnimation = 0;
@@ -251,17 +304,21 @@ function game_handler() {
 	   */
     this.draw = function(canvas, ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.game_map.draw(ctx);
+        // Draw in 2D.
+        if (DRAW_2D) {
+	        this.game_map.draw(ctx);
 
-        for (var i = 0; i < this.pellets.length; i++) {
-            this.pellets[i].draw(ctx);
+	        for (var i = 0; i < this.pellets.length; i++) {
+	            this.pellets[i].draw(ctx);
+	        }
+
+	        for (var i = 0; i < this.ghosts.length; i++) {
+	            this.ghosts[i].draw(ctx);
+	        }
+
+        	this.pacman.draw(ctx);
         }
 
-        for (var i = 0; i < this.ghosts.length; i++) {
-            this.ghosts[i].draw(ctx);
-        }
-
-        this.pacman.draw(ctx);
 		//Draw in 3D.
         if (DRAW_3D) {
             drawingThing.drawPacman(this.pacman.pos.x, this.pacman.pos.y, Math.abs(testingPacmanAnimation), this.pacman.vel);
