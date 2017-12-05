@@ -3,6 +3,7 @@
    * @param canvas The canvas to draw to.
    */
 function drawing(canvas) {
+	var SPHERE_QUALITY = 10;
 	
 	var scene = new THREE.Scene();
 	//From https://stackoverflow.com/questions/41786413/render-three-js-scene-in-html5-canvas
@@ -129,8 +130,8 @@ function drawing(canvas) {
 	
 		//Creates the actual sphere.
 		function createPelletSphere(x, y, size) {
-			//Creates a shpere with a given size and a "fidelity" of 5 and 4 for the width and height.
-			var geometry = new THREE.SphereGeometry( size, 5, 4 );
+			//Creates a shpere with a given size and a "fidelity" of 3 and 2 for the width and height.
+			var geometry = new THREE.SphereGeometry( size, 4, 3 );
 			var mesh = new THREE.Mesh( geometry, pelletMaterial );
 			mesh.position.set( x, y, 0 );
 			entities.push(mesh);
@@ -142,7 +143,7 @@ function drawing(canvas) {
 	
 	//Creates the Pacman object.
 	//Holds the "mesh" object that represents Pacman.
-	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16);
+	var pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, SPHERE_QUALITY, SPHERE_QUALITY);
 	var pacman = new THREE.Mesh( pacmanGeometry, pacmanMaterial );
 	var pacmanLight = new THREE.PointLight( pacmanMaterial.color/*"#FFFFFF"/*/, 3, TILE_SIZE*3 );
 	pacmanLight.position.set(0,-TILE_SIZE*0,0);
@@ -159,7 +160,7 @@ function drawing(canvas) {
 	   * @param direction the direction that Pacman faces, ranging from 0 for right to 3 to bottom.
 	   */
 	this.drawPacman = function(x, y, mouthOpen, direction) {		
-		pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, 16, 16, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
+		pacmanGeometry = new THREE.SphereBufferGeometry( TILE_SIZE/4, SPHERE_QUALITY, SPHERE_QUALITY, (mouthOpen)*Math.PI, (1-mouthOpen)*Math.PI*2);
 		pacman.geometry = pacmanGeometry;
 		pacman.position.set( x, y, 0 );
 		if (direction.x != undefined) {
@@ -188,13 +189,13 @@ function drawing(canvas) {
 		ghost.ghostNumber = ghostNumber;
 		
 		//Create the "base" of the ghost.
-		var ghostBase = new THREE.Mesh( new THREE.CylinderGeometry( GHOST_RADIUS, GHOST_RADIUS, GHOST_RADIUS, 16 ),
+		var ghostBase = new THREE.Mesh( new THREE.CylinderGeometry( GHOST_RADIUS, GHOST_RADIUS, GHOST_RADIUS, SPHERE_QUALITY ),
 				ghostMaterials[ghostNumber]);
 		ghostBase.position.y = GHOST_RADIUS/2;
 		ghost.add(ghostBase);
 		
 		//Create the "head" of the ghost.
-		var ghostHead = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS, 16, 16,  0, Math.PI*2, 0 ,Math.PI/2),
+		var ghostHead = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS, SPHERE_QUALITY, SPHERE_QUALITY,  0, Math.PI*2, 0 ,Math.PI/2),
 				ghostMaterials[ghostNumber]);
 		ghostHead.rotateZ(Math.PI);
 		ghost.add(ghostHead);
@@ -202,7 +203,7 @@ function drawing(canvas) {
 		ghost.ghostPupils = new THREE.Group();
 		
 		var EYE_POS = 1.2;
-		var ghostLeftEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, 8, 8),
+		var ghostLeftEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, SPHERE_QUALITY/2, SPHERE_QUALITY/2),
 				whiteMaterial);
 		ghostLeftEye.position.x = -GHOST_RADIUS*Math.cos(EYE_POS);
 		ghostLeftEye.position.y = -1;
@@ -217,7 +218,7 @@ function drawing(canvas) {
 		ghostLeftPupil.position.z = -GHOST_RADIUS*Math.sin(EYE_POS)*1.1;
 		ghost.ghostPupils.add(ghostLeftPupil);
 		
-		var ghostRightEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, 8, 8),
+		var ghostRightEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, SPHERE_QUALITY/2, SPHERE_QUALITY/2),
 				whiteMaterial);
 		ghostRightEye.position.x = GHOST_RADIUS*Math.cos(EYE_POS);
 		ghostRightEye.position.y = -1;
@@ -262,6 +263,40 @@ function drawing(canvas) {
 		ghost.drawingObject3D.ghostPupils.position.x = ghost.vel.x;
 		ghost.drawingObject3D.ghostPupils.position.y = ghost.vel.y-1;
 	}
+	
+	
+	this.text = "";
+	this.createText = function(text) {
+		var loader = new THREE.FontLoader();
+
+		loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+			var textGeometry = new THREE.TextGeometry( text, {
+				font: font,
+				size: 80,
+				height: 5,
+				curveSegments: 1,
+				bevelEnabled: true,
+				bevelThickness: 10,
+				bevelSize: 8,
+				bevelSegments: 3
+			} );
+			var textMesh = new THREE.Mesh( textGeometry, pacmanMaterial );
+			var textLight = new THREE.PointLight( pacmanMaterial.color, 3, TILE_SIZE*3 );
+			textLight.position.set(0,0,0);
+			textMesh.scale.y = -1;
+			textMesh.add(textLight);
+			scene.add( textMesh );
+			return textMesh;
+		});
+	}
+	
+	this.drawText = function(text, animationFrame) {
+		this.createText(text);
+		
+		
+	}
+	
+	
 	
 	
 	var testingPacmanAnimation = 0;

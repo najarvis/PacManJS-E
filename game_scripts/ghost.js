@@ -169,6 +169,9 @@ Ghost.prototype.makeScared = function(time) {
 	this.type = 4;
 	this.displayType = 4;
 	this.timer = time;
+	if (this.timer < 2) {
+		this.timer = 2;
+	}
 	this.speed = 30;
 	if (this.vel.x == this.goal_x) {
 		this.vel.x = -this.vel.x;
