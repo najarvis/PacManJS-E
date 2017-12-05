@@ -28,6 +28,14 @@ function drawing(canvas) {
 		new THREE.MeshStandardMaterial( { color: 0x0000ff} )
 	];
 	
+	//Load the font.
+	var loader = new THREE.FontLoader();
+	this.font = null;
+	var THIS = this;
+	loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+		THIS.font = font;
+	});
+	
 	
 	//The camera is 5 units away from the thing.
 	var camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 1000 );
@@ -267,33 +275,44 @@ function drawing(canvas) {
 	
 	this.text = "";
 	this.createText = function(text) {
-		var loader = new THREE.FontLoader();
-
-		loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-			var textGeometry = new THREE.TextGeometry( text, {
-				font: font,
-				size: 80,
-				height: 5,
-				curveSegments: 1,
-				bevelEnabled: true,
-				bevelThickness: 10,
-				bevelSize: 8,
-				bevelSegments: 3
-			} );
-			var textMesh = new THREE.Mesh( textGeometry, pacmanMaterial );
-			var textLight = new THREE.PointLight( pacmanMaterial.color, 3, TILE_SIZE*3 );
-			textLight.position.set(0,0,0);
-			textMesh.scale.y = -1;
-			textMesh.add(textLight);
-			scene.add( textMesh );
-			return textMesh;
-		});
+		if (this.font == null) {
+		console.log("Not loaded")
+			return null;
+		}
+		
+		var textGeometry = new THREE.TextGeometry( text, {
+			font: this.font,
+			size: 80,
+			height: 5,
+			curveSegments: 1,
+			bevelEnabled: true,
+			bevelThickness: 10,
+			bevelSize: 8,
+			bevelSegments: 3
+		} );
+		var textMesh = new THREE.Mesh( textGeometry, pacmanMaterial );
+		var textLight = new THREE.PointLight( pacmanMaterial.color, 3, TILE_SIZE*3 );
+		textLight.position.set(0,0,0);
+		textMesh.scale.y = -1;
+		textMesh.add(textLight);
+		scene.add( textMesh );
+		return textMesh;
 	}
 	
-	this.drawText = function(text, animationFrame) {
-		this.createText(text);
-		
-		
+	this.textMesh = null;
+	
+	this.drawText = function(text, animationRotate, animationExit) {
+		if (this.textMesh == null || this.textMesh == undefined || (this.text !== text && text !== "")) {
+			this.textMesh = this.createText(text);
+		} else if (text === "") {
+			canvas.remove(this.textMesh);
+			this.textMesh = null;
+		}
+		if (this.textMesh != null) {
+			this.textMesh.position.z = animationExit;
+			this.textMesh.rotation.set(animationExit*Math.PI/2, animationRotate*Math.PI*2, 0);
+		}
+		this.text = text;
 	}
 	
 	

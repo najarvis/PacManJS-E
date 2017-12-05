@@ -52,9 +52,9 @@ function game_handler() {
     this.lives = 3;
 	this.level = 0;
 	//1 = playing, 2 = ready, 3 = dying.
-	this.status = 1;
+	this.status = 2;
 	//Used for the "Ready" timer and death animation.
-	this.statusTimer = 0;
+	this.statusTimer = 2;
 	
 	
 	
@@ -129,6 +129,41 @@ function game_handler() {
 		
 		if (this.status < 0) {
 			//Paused. Do nothing.
+		} else if (this.status == 2) {
+			//Ready status
+			drawingThing.drawText("Level "+this.level, 0, 0);
+			//Change status
+			this.statusTimer -= delta;
+			if (this.statusTimer <= 0) {
+				this.status = 1;
+				this.statusTimer = 2;
+			}
+		} else if (this.status == 3) {
+			//Pacman died status
+			this.statusTimer -= delta;
+			if (this.statusTimer <= -1) {
+				this.lives -= 1;
+				this.pacman.pos = this.pacman.start_pos;
+				for (var i = 0; i < this.ghosts.length; i++) {
+					this.ghosts[i].pos = this.ghosts[i].start_pos;
+				}
+				this.statusTimer = 1;
+
+				// All out of lives. Start new game.
+				if (this.lives == 0) {
+					console.log("Final score: " + this.score);
+					this.game_map.start();
+					this.pellets = [];
+					this.generate_pellets();
+					this.score = 0;
+					this.lives = 3;
+					this.level = 1;
+				}
+				this.status = 2;
+				this.statusTimer = 2;
+			}
+		} else if (this.status == 4) {
+			//Game over status
 		} else if (this.status == 1) {
 		
 			this.pacman.update(this.game_map, delta, input);
@@ -147,22 +182,9 @@ function game_handler() {
 
 			// Hit by a ghost
 			if (hit) {
-				this.lives -= 1;
-				this.pacman.pos = this.pacman.start_pos;
-				for (var i = 0; i < this.ghosts.length; i++) {
-					this.ghosts[i].pos = this.ghosts[i].start_pos;
-				}
-
-				// All out of lives. Start new game.
-				if (this.lives == 0) {
-					console.log("Final score: " + this.score);
-					this.game_map.start();
-					this.pellets = [];
-					this.generate_pellets();
-					this.score = 0;
-					this.lives = 3;
-					this.level = 1;
-				}
+				//Set the status to reflect this. This will stop al updating
+				//and play the Pacman death animation.
+				this.status = 3;
 			}
 
 			// handle pellet collision
@@ -206,13 +228,13 @@ function game_handler() {
 					this.ghosts[i].pos = this.ghosts[i].start_pos;
 				}
 			}
-
-			// Update game info at the top.
-			document.getElementById('score').innerHTML = this.score;
-			document.getElementById('h_score').innerHTML = this.high_score;
-			document.getElementById('lives').innerHTML = this.lives;
-			document.getElementById('level').innerHTML = this.level;
 		}//End the status code.
+
+		// Update game info at the top.
+		document.getElementById('score').innerHTML = this.score;
+		document.getElementById('h_score').innerHTML = this.high_score;
+		document.getElementById('lives').innerHTML = this.lives;
+		document.getElementById('level').innerHTML = this.level;
 
     }
 
@@ -223,7 +245,6 @@ function game_handler() {
 	//Used for Pacman animation.
 	var testingPacmanAnimation = 0;
 	
-	drawingThing.drawText("AWESOME!");
 	
 	 /** Draws the game, including the pellets and the ghosts.
 	   * @param ctx the canvas context to draw on.
@@ -249,10 +270,19 @@ function game_handler() {
             }
 			
         }
-        //The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
-        testingPacmanAnimation += 0.02;
-        if (testingPacmanAnimation > 0.2) {
-            testingPacmanAnimation = -0.2;	
-        }
+		
+		if (this.status == 3) {
+			//Pacman's death animation is displayed.
+			testingPacmanAnimation -= 0.02;
+			if (testingPacmanAnimation < -1) {
+				testingPacmanAnimation = -1;
+			}
+		} else {
+			//The animation loops from -0.2 to 0.2, using an absolute value to display correctly.
+			testingPacmanAnimation -= 0.02;
+			if (testingPacmanAnimation < -0.2) {
+				testingPacmanAnimation = 0.2;	
+			}
+		}
     }
 }
