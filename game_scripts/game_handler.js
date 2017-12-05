@@ -26,7 +26,7 @@ $(document).ready(function() {
     var KEYS = [];
     window.addEventListener('keydown', function(e) {
         KEYS[e.keyCode] = true;
-        console.log(e.keyCode);
+		//console.log(e.keyCode);
     });
 
     window.addEventListener('keyup', function(e) {
@@ -57,14 +57,14 @@ function game_handler() {
     this.ghosts = [];
 
     if (GHOSTS_ENABLE) {
-        this.ghosts = [new Ghost(this.game_map.tiles[1].get_center(),0),
-                       new Ghost(this.game_map.tiles[this.game_map.tiles.length-1].get_center(),1),
-					   new Ghost(this.game_map.tiles[3].get_center(),2),
-					   new Ghost(this.game_map.tiles[this.game_map.tiles.length-2].get_center(),3)];
+        this.ghosts = [new Ghost(this.game_map.tiles[MAP_SIZE_X+2].get_center(),0),
+                       new Ghost(this.game_map.tiles[MAP_SIZE_X*(MAP_SIZE_Y-2)+2].get_center(),1),
+					   new Ghost(this.game_map.tiles[MAP_SIZE_X+3].get_center(),2),
+					   new Ghost(this.game_map.tiles[MAP_SIZE_X*(MAP_SIZE_Y-2)+3].get_center(),3)];
     }
 
     // Start pacman in the topleft corner. TODO: Change this to something in the center of the screen.
-    this.pacman = new Pacman(this.game_map.tiles[0].get_center());
+    this.pacman = new Pacman(this.game_map.tiles[MAP_SIZE_X*MAP_SIZE_Y/2+MAP_SIZE_X-1].get_center());
     //this.generate_pellets();
 
     this.generate_pellets = function() {
@@ -118,7 +118,11 @@ function game_handler() {
         for (var i = 0;i < this.ghosts.length; i++) {
             this.ghosts[i].update(this.game_map, this.pacman, delta);
             if (this.pacman.check_collision(this.ghosts[i])) {
-                hit = true;
+				if (this.ghosts[i].type >= 4) {
+					this.ghosts[i].pos = this.game_map.tiles[MAP_SIZE_X*MAP_SIZE_Y/2+MAP_SIZE_X-1].get_center();
+				} else {
+					hit = true;
+				}
             }
         }
 
@@ -155,7 +159,10 @@ function game_handler() {
                 this.score += 10;
             } else {
                 this.score += 50;
-                // Power pellet code should go here.
+				//Make the ghosts scared.
+				for (var j = 0; j < this.ghosts.length; j++) {
+					this.ghosts[j].makeScared(7);
+				}
             }
             if (this.score > this.high_score) { this.high_score = this.score; }
 
@@ -163,7 +170,7 @@ function game_handler() {
             if (DRAW_3D) {
                 drawingThing.removeObject(this.pellets[eaten[i]].drawingObject3D);
             }
-            console.log(this.score);
+            //console.log(this.score);
             this.pellets.splice(eaten[i], 1);
         }
         

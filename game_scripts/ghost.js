@@ -9,7 +9,16 @@
 function Ghost(pos, type) {
     Entity.call(this, pos);
 	this.type = type;
+	//This variable is used to know which ghost to go back to if it becomes 
+	//"type 4" - the edible ghost.
+	this.origionalType = type;
+	//This one is used for displaying the ghost and creating the flashing
+	//effect when changing from scared to normal.
+	this.displayType = type;
     this.requestedVel = new vector2(0,0);
+	
+	//The timer is used for when the ghost becomes scared.
+	this.timer = 0;
 };
 
 Ghost.prototype = Object.create(Entity.prototype);
@@ -47,10 +56,18 @@ Ghost.prototype.update = function(map, pacman, delta) {
 			goal_x = -goal_x;
 			goal_y = -goal_y;
 		}
+	} else if (this.type == 4) {
+		// The behavior of a scared ghost is to run away from Pacman.
+		var goal_x = -(pacman.pos.x - this.pos.x);
+		var goal_y = -(pacman.pos.y - this.pos.y);
 	}
 	//Sets the goal directions so that they are 0, 1, or -1.
 	var norm_x = goal_x == 0 ? 0 : goal_x / Math.abs(goal_x);
 	var norm_y = goal_y == 0 ? 0 : goal_y / Math.abs(goal_y);
+	
+	if (this.vel.x == 0 && this.vel.y == 0) {
+		
+	}
 	
 	
 	
@@ -120,16 +137,43 @@ Ghost.prototype.update = function(map, pacman, delta) {
 	}
 	this.pos = validPos.newPosition;
 	
-    /*this.pos = this.pos.add(this.vel);
-	
-    if (!this.valid_pos(map) || this.in_wall(map.get_tile_pos(this.pos)) || Math.abs(goal_y) < 1) {
-        this.pos = this.pos.add(this.vel.mul(-1));
 
-        this.vel = new vector2(norm_x * this.speed * delta, 0);
-        this.pos = this.pos.add(this.vel);
+	//This code handles the timer for when the ghost blinks.
+	if (this.timer > 0) {
+		this.timer -= delta;
+		
+		if (this.timer <= 0) {
+			//The timer has run out. Reset the type.
+			this.type = this.origionalType;
+			this.displayType = this.origionalType;
+			this.speed = 60;
+		} else if (this.timer <= 2) {
+			//Make the ghost blink.
+			if (this.timer*20 % 10 <= 5) {
+				this.displayType = this.origionalType;
+			} else {
+				this.displayType = 4;
+			}
+			
+		}
+		
+		
+	}
+}
 
-        if (!this.valid_pos(map) || this.in_wall(map.get_tile_pos(this.pos))) {
-            this.pos = this.pos.add(this.vel.mul(-1));
-        }
-    }*/
+
+ /** Makes the ghost into the "scared" state for the given time.
+   * @param time The time in seconds that the ghost will be scared.
+   */
+Ghost.prototype.makeScared = function(time) {
+	this.type = 4;
+	this.displayType = 4;
+	this.timer = time;
+	this.speed = 30;
+	if (this.vel.x == this.goal_x) {
+		this.vel.x = -this.vel.x;
+	}
+	if (this.vel.y == this.goal_y) {
+		this.vel.y = -this.vel.y;
+	}
 }

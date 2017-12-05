@@ -16,13 +16,15 @@ function drawing(canvas) {
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
 	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
 	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00, side: THREE.DoubleSide } );
+	var whiteMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
 	//Determines the colors of the ghosts.
-	//0 = Clyde (Orange), 1 = Blinky (Red), 2 = Pinky (Pink), 3 = Inky (Blue)
+	//0 = Clyde (Orange), 1 = Blinky (Red), 2 = Pinky (Pink), 3 = Inky (Blue), 4 = Scared (Blue)
 	var ghostMaterials = [
 		new THREE.MeshStandardMaterial( { color: 0xff8800} ),
 		new THREE.MeshStandardMaterial( { color: 0xff0000} ),
 		new THREE.MeshStandardMaterial( { color: 0xff8888} ),
-		new THREE.MeshStandardMaterial( { color: 0x00ffff} )
+		new THREE.MeshStandardMaterial( { color: 0x00ffff} ),
+		new THREE.MeshStandardMaterial( { color: 0x0000ff} )
 	];
 	
 	
@@ -183,6 +185,7 @@ function drawing(canvas) {
 		var GHOST_RADIUS = TILE_SIZE/4;
 		//Represents the whole ghost.
 		var ghost = new THREE.Group();
+		ghost.ghostNumber = ghostNumber;
 		
 		//Create the "base" of the ghost.
 		var ghostBase = new THREE.Mesh( new THREE.CylinderGeometry( GHOST_RADIUS, GHOST_RADIUS, GHOST_RADIUS, 16 ),
@@ -195,6 +198,41 @@ function drawing(canvas) {
 				ghostMaterials[ghostNumber]);
 		ghostHead.rotateZ(Math.PI);
 		ghost.add(ghostHead);
+		
+		ghost.ghostPupils = new THREE.Group();
+		
+		var EYE_POS = 1.2;
+		var ghostLeftEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, 8, 8),
+				whiteMaterial);
+		ghostLeftEye.position.x = -GHOST_RADIUS*Math.cos(EYE_POS);
+		ghostLeftEye.position.y = -1;
+		ghostLeftEye.position.z = -GHOST_RADIUS*Math.sin(EYE_POS);
+		ghostLeftEye.scale.y = 1.1;
+		ghostLeftEye.scale.z = 0.2;
+		ghost.add(ghostLeftEye);
+		
+		var ghostLeftPupil = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/6, 4, 4),
+				blueBasicMaterial);
+		ghostLeftPupil.position.x = -GHOST_RADIUS*Math.cos(EYE_POS)*1.1;
+		ghostLeftPupil.position.z = -GHOST_RADIUS*Math.sin(EYE_POS)*1.1;
+		ghost.ghostPupils.add(ghostLeftPupil);
+		
+		var ghostRightEye = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/3, 8, 8),
+				whiteMaterial);
+		ghostRightEye.position.x = GHOST_RADIUS*Math.cos(EYE_POS);
+		ghostRightEye.position.y = -1;
+		ghostRightEye.position.z = -GHOST_RADIUS*Math.sin(EYE_POS);
+		ghostRightEye.scale.y = 1.1;
+		ghostRightEye.scale.z = 0.2;
+		ghost.add(ghostRightEye);
+		
+		var ghostRightPupil = new THREE.Mesh( new THREE.SphereGeometry( GHOST_RADIUS/6, 4, 4),
+				blueBasicMaterial);
+		ghostRightPupil.position.x = GHOST_RADIUS*Math.cos(EYE_POS)*1.1;
+		ghostRightPupil.position.z = -GHOST_RADIUS*Math.sin(EYE_POS)*1.1;
+		ghost.ghostPupils.add(ghostRightPupil);
+		
+		ghost.add(ghost.ghostPupils);
 		
 		//Create a realistic light on the ghosts to make the game look more tacky.
 		var light = new THREE.PointLight( ghostMaterials[ghostNumber].color, 3, TILE_SIZE*2 );
@@ -209,22 +247,20 @@ function drawing(canvas) {
 	}
 	
 	
-	/*var ghosts = [
-		this.createGhost(0),
-		this.createGhost(1),
-		this.createGhost(2),
-		this.createGhost(3)
-	];*/
-	
 	 /** Draws the given ghost. Creates a 3d version if it doesn't exist.
 	   * @param ghost The ghost to draw.
 	   */
 	this.drawGhost = function(ghost) {
 		if (ghost.drawingObject3D == undefined || ghost.drawingObject3D == null) {
-			ghost.drawingObject3D = this.createGhost(ghost.type);
+			ghost.drawingObject3D = this.createGhost(ghost.displayType);
 			//entities.push(ghost.drawingObject3D);
+		} else if (ghost.displayType != ghost.drawingObject3D.ghostNumber) {
+			scene.remove(ghost.drawingObject3D);
+			ghost.drawingObject3D = this.createGhost(ghost.displayType);
 		}
 		ghost.drawingObject3D.position.set( ghost.pos.x, ghost.pos.y, 0 );
+		ghost.drawingObject3D.ghostPupils.position.x = ghost.vel.x;
+		ghost.drawingObject3D.ghostPupils.position.y = ghost.vel.y-1;
 	}
 	
 	
