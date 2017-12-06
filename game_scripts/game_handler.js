@@ -15,6 +15,8 @@ if (DRAW_3D) {
     drawingThing = new drawing(document.getElementById("canvas3d"));
 }
 
+audio = new sound();
+
 var gh;
 
 //Equivilant of the "main" function of javascript.
@@ -100,11 +102,35 @@ function game_handler() {
 			this.ghosts[i].removeScared();
 		}
 		//1 = playing, 2 = ready, 3 = dying.
-		this.status = 2;
-		//Used for the "Ready" timer and death animation.
-		this.statusTimer = 2;
+		this.setStatus(2);
 	}
 	
+	 /** Sets the status of the game. 1 = playing, 2 = ready, 3 = dying, 4 = game over.
+	   * Negative numbers are puased, though this function does not support said numbers.
+	   * @param ctx the canvas context to draw on.
+	   */
+	this.setStatus = function(status) {
+		if (status == 1) {
+			//GO
+			this.status = 1;
+			this.statusTimer = 1;
+		} else if (status == 2) {
+			//Before Level
+			this.status = 2;
+			this.statusTimer = 4.5;
+		} else if (status == 3) {
+			//Die
+			this.status = 3;
+			this.statusTimer = 1;
+		} else if (status == 4) {
+			//Game Over
+			this.status = 4;
+			this.statusTimer = 6;
+		}
+		audio.playStatusSound(status);
+		
+		
+	}
 	
     this.game_map = new map();
     this.game_map.start();
@@ -170,7 +196,9 @@ function game_handler() {
 		if (delta > 0.1) {
 			delta = 0.1;
 		}
-
+		
+		//Always update the audio.
+		audio.update(delta);
 		
 		if (this.status < 0) {
 			//Paused. Do nothing.
@@ -180,8 +208,7 @@ function game_handler() {
 			//Change status
 			this.statusTimer -= delta;
 			if (this.statusTimer <= 0) {
-				this.status = 1;
-				this.statusTimer = 1;
+				this.setStatus(1);
 			}
 		} else if (this.status == 3) {
 			//Pacman died status
@@ -191,21 +218,23 @@ function game_handler() {
 
 				// All out of lives. Start new game.
 				if (this.lives == 0) {
-					this.status = 4;
-					this.statusTimer = 5;
+					this.setStatus(4);
 				} else {
 					//If not out of new lives, respawn.
 					this.pacman.pos = this.pacman.start_pos;
 					for (var i = 0; i < this.ghosts.length; i++) {
 						this.ghosts[i].pos = this.ghosts[i].start_pos;
 					}
-					this.status = 2;
-					this.statusTimer = 2;
+					this.setStatus(2);
 				}
 			}
 		} else if (this.status == 4) {
 			//Game over status
-			drawingThing.drawText("Game Over", 2, this.statusTimer, 0);
+			if (this.statusTimer >= 4.7) {
+				drawingThing.drawText("Game Over", 2, this.statusTimer, 0);
+			} else {
+				drawingThing.drawText("Game Over\n     YEAH!", 2, this.statusTimer, (4.7-this.statusTimer)/4);
+			}
 
 			//Status Timer.
 			this.statusTimer -= delta;
@@ -270,6 +299,7 @@ function game_handler() {
 
 				if (this.pacman.check_collision(this.ghosts[i])) {
 					if (this.ghosts[i].type >= 4) {
+						audio.playEatGhostSound();
 						this.ghosts[i].timer = 1;
 						this.ghosts[i].pos = this.game_map.tiles[MAP_SIZE_X*MAP_SIZE_Y/2+MAP_SIZE_X-1].get_center();
 						this.score += this.scoreMultiplier;
@@ -284,8 +314,7 @@ function game_handler() {
 			if (hit) {
 				//Set the status to reflect this. This will stop al updating
 				//and play the Pacman death animation.
-				this.status = 3;
-				this.statusTimer = 1;
+				this.setStatus(3);
 			}
 
 			// handle pellet collision
@@ -298,6 +327,7 @@ function game_handler() {
 
 			// Go through all the eaten pellets in a separate loop.
 			for (var i = 0; i < eaten.length; i++) {
+				audio.playEatDotSound();
 				if (this.pellets[eaten[i]].type == "default") {
 					this.score += 10;
 				} else {

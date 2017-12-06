@@ -25,6 +25,6 @@ app.post('/update_high_scores', function(req, res) {
 	res.send(data);
 });
 
-app.get(['/res/*', '/game_scripts/*'], function(req, res, next){
+app.get(['/res/*', '/game_scripts/*', '/sounds/*'], function(req, res, next){
     res.sendFile(__dirname + '/' + req.url);
 });
