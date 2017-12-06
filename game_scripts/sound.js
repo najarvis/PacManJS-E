@@ -3,15 +3,15 @@
    * @param canvas The canvas to draw to.
    */
 function sound() {
-	this.COOL_SOUNDS = true;
+	this.COOL_SOUNDS = false;
 	
 	if (this.COOL_SOUNDS) {
-		this.startSound = new Audio("/sounds/pacman_beginning.wav");
+		this.startSound = new Audio("/sounds/brawl.mp3");
 		this.loopingSound = new Audio("/sounds/pacman_chomp.wav");
-		this.deathSound = new Audio("/sounds/pacman_death.wav");
-		this.eatGhostSound = new Audio("/sounds/pacman_eatghost.wav");
+		this.deathSound = new Audio("/sounds/Heavy_domination17.wav");
+		this.eatGhostSound = new Audio("/sounds/getover.wav");
 		this.gameOverSound = new Audio("/sounds/Game-over-yeah.mp3");
-		this.goSound = null;
+		this.goSound = new Audio("/sounds/go.mp3");
 	} else {
 		this.startSound = new Audio("/sounds/pacman_beginning.wav");
 		this.loopingSound = new Audio("/sounds/pacman_chomp.wav");
