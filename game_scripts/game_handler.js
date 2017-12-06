@@ -81,13 +81,29 @@ function game_handler() {
     this.high_score = hs_data.score;
     this.hs_name = hs_data.name;
 
-    this.lives = 3;
-	this.level = 0;
-	//1 = playing, 2 = ready, 3 = dying.
-	this.status = 2;
-	//Used for the "Ready" timer and death animation.
-	this.statusTimer = 2;
 	
+	this.lives = 3;
+	this.level = 1;
+	
+	//This is simply for the ghost scoring. When eating a ghost, this doubles.
+	//When all ghosts return to normal, this resets to 200.
+	this.scoreMultiplier = 200;
+
+	this.resetLevel = function() {
+		this.game_map.start();
+		this.pellets = [];
+		this.generate_pellets();
+
+		this.pacman.pos = this.pacman.start_pos;
+		for (var i = 0; i < this.ghosts.length; i++) {
+			this.ghosts[i].pos = this.ghosts[i].start_pos;
+			this.ghosts[i].removeScared();
+		}
+		//1 = playing, 2 = ready, 3 = dying.
+		this.status = 2;
+		//Used for the "Ready" timer and death animation.
+		this.statusTimer = 2;
+	}
 	
 	
     this.game_map = new map();
@@ -106,7 +122,6 @@ function game_handler() {
 
     // Start pacman in the center
     this.pacman = new Pacman(this.game_map.tiles[MAP_SIZE_X * MAP_SIZE_Y / 2 + MAP_SIZE_X - 1].get_center());
-
 	
     this.generate_pellets = function() {
         for (var i = 0; i < this.game_map.tiles.length; i++) {
@@ -141,6 +156,9 @@ function game_handler() {
     }
 	
 
+	//PRepare the level as soon as it's started.
+	this.resetLevel();
+
     this.update = function(input) {
         var new_frame = new Date();
         var delta = (new_frame - this.last_frame) / 1000;
@@ -158,80 +176,104 @@ function game_handler() {
 			//Paused. Do nothing.
 		} else if (this.status == 2) {
 			//Ready status
-			drawingThing.drawText("Level "+this.level, 0, 0);
+			drawingThing.drawText("Level "+this.level, 0, 0, 0);
 			//Change status
 			this.statusTimer -= delta;
 			if (this.statusTimer <= 0) {
 				this.status = 1;
-				this.statusTimer = 2;
+				this.statusTimer = 1;
 			}
 		} else if (this.status == 3) {
 			//Pacman died status
 			this.statusTimer -= delta;
 			if (this.statusTimer <= -1) {
 				this.lives -= 1;
-				this.pacman.pos = this.pacman.start_pos;
-				for (var i = 0; i < this.ghosts.length; i++) {
-					this.ghosts[i].pos = this.ghosts[i].start_pos;
-				}
-				this.statusTimer = 1;
 
 				// All out of lives. Start new game.
 				if (this.lives == 0) {
-					console.log("Final score: " + this.score);
-					if (this.score > this.high_score) { 
-						this.high_score = this.score;
-						console.log("New high score!");
-						this.hs_name = prompt("New high score! What is your name?");
-
-						// UPDATE HIGH SCORE TABLE HERE.
-						let temp_scores = null;
-					    $.ajax({
-					    	url: '/get_high_scores',
-					    	type: 'get',
-					    	dataType: 'json',
-					    	async: false,
-					    	success: function(res) {
-						     	temp_scores = res;
-						    }
-					    });
-
-					    let hs = this.high_score;
-					    let hsn = this.hs_name;
-					    temp_scores.scores.push({"name": hsn, "score": hs});
-
-					    $.ajax({
-					    	url: '/update_high_scores',
-					    	type: 'post',
-					    	data: JSON.stringify(temp_scores),
-					    	contentType: "application/json; charset=utf-8",
-					    	dataType: "json",
-					    	success: function(data) {console.log(data);}
-					    });
-
+					this.status = 4;
+					this.statusTimer = 5;
+				} else {
+					//If not out of new lives, respawn.
+					this.pacman.pos = this.pacman.start_pos;
+					for (var i = 0; i < this.ghosts.length; i++) {
+						this.ghosts[i].pos = this.ghosts[i].start_pos;
 					}
-					this.game_map.start();
-					this.pellets = [];
-					this.generate_pellets();
-					this.score = 0;
-					this.lives = 3;
-					this.level = 1;
+					this.status = 2;
+					this.statusTimer = 2;
 				}
-				this.status = 2;
-				this.statusTimer = 2;
 			}
 		} else if (this.status == 4) {
 			//Game over status
+			drawingThing.drawText("Game Over", 2, this.statusTimer, 0);
+
+			//Status Timer.
+			this.statusTimer -= delta;
+			if (this.statusTimer <= 0) {
+				//Deal with the actual "Game Over" stuff after displaying the
+				//REALISTIC 3D text!
+				console.log("Final score: " + this.score);
+				if (this.score > this.high_score) { 
+					this.high_score = this.score;
+					console.log("New high score!");
+					this.hs_name = prompt("New high score! What is your name?");
+
+					// UPDATE HIGH SCORE TABLE HERE.
+					let temp_scores = null;
+					$.ajax({
+						url: '/get_high_scores',
+						type: 'get',
+						dataType: 'json',
+						async: false,
+						success: function(res) {
+							temp_scores = res;
+						}
+					});
+
+					let hs = this.high_score;
+					let hsn = this.hs_name;
+					temp_scores.scores.push({"name": hsn, "score": hs});
+
+					$.ajax({
+						url: '/update_high_scores',
+						type: 'post',
+						data: JSON.stringify(temp_scores),
+						contentType: "application/json; charset=utf-8",
+						dataType: "json",
+						success: function(data) {console.log(data);}
+					});
+
+				}
+				this.resetLevel();
+				this.score = 0;
+				this.lives = 3;
+				this.level = 1;
+			}
 		} else if (this.status == 1) {
+
+
+			//Deals with the "Go" text.
+			this.statusTimer -= delta;
+			if (this.statusTimer > 0) {
+				drawingThing.drawText("GO!", 1, 0, (1-this.statusTimer));
+				if (this.statusTimer <= 0) {
+					//Remove the status text.
+					drawingThing.drawText("", 0, 0, 0);
+				}
+			}
 		
 			this.pacman.update(this.game_map, delta, input);
 
 			var hit = false;
-			for (var i = 0;i < this.ghosts.length; i++) {
+			for (var i = 0; i < this.ghosts.length; i++) {
 				this.ghosts[i].update(this.game_map, this.pacman, delta);
+
 				if (this.pacman.check_collision(this.ghosts[i])) {
 					if (this.ghosts[i].type >= 4) {
+						this.ghosts[i].timer = 1;
 						this.ghosts[i].pos = this.game_map.tiles[MAP_SIZE_X*MAP_SIZE_Y/2+MAP_SIZE_X-1].get_center();
+						this.score += this.scoreMultiplier;
+						this.scoreMultiplier = this.scoreMultiplier*2;
 					} else {
 						hit = true;
 					}
@@ -243,6 +285,7 @@ function game_handler() {
 				//Set the status to reflect this. This will stop al updating
 				//and play the Pacman death animation.
 				this.status = 3;
+				this.statusTimer = 1;
 			}
 
 			// handle pellet collision
@@ -259,7 +302,8 @@ function game_handler() {
 					this.score += 10;
 				} else {
 					this.score += 50;
-					//Make the ghosts scared.
+					//Make the ghosts scared, and reset the scoreMultiplier.
+					this.scoreMultiplier = 200;
 					for (var j = 0; j < this.ghosts.length; j++) {
 						this.ghosts[j].makeScared(15-this.level*3);
 					}
@@ -276,14 +320,8 @@ function game_handler() {
 			
 			// No pellets remaining? New map!
 			if (this.pellets.length == 0) {
-				this.game_map.start();
-				this.generate_pellets();
+				this.resetLevel();
 				this.level++;
-
-				this.pacman.pos = this.pacman.start_pos;
-				for (var i = 0; i < this.ghosts.length; i++) {
-					this.ghosts[i].pos = this.ghosts[i].start_pos;
-				}
 			}
 		}//End the status code.
 
@@ -328,7 +366,7 @@ function game_handler() {
 			
         }
 		
-		if (this.status == 3) {
+		if (this.status >= 3 || this.status <= -3) {
 			//Pacman's death animation is displayed.
 			testingPacmanAnimation -= 0.02;
 			if (testingPacmanAnimation < -1) {

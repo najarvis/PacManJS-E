@@ -162,6 +162,16 @@ Ghost.prototype.update = function(map, pacman, delta) {
 }
 
 
+ /** Removes the ghost from the "scared" state and return him to normal.
+   */
+Ghost.prototype.removeScared = function() {
+	this.type = this.origionalType;
+	this.displayType = this.origionalType;
+	this.speed = 60;
+	this.timer = 0;
+}
+
+
  /** Makes the ghost into the "scared" state for the given time.
    * @param time The time in seconds that the ghost will be scared.
    */
@@ -173,10 +183,10 @@ Ghost.prototype.makeScared = function(time) {
 		this.timer = 2;
 	}
 	this.speed = 30;
-	if (this.vel.x == this.goal_x) {
+	//if (this.vel.x == this.goal_x) {
 		this.vel.x = -this.vel.x;
-	}
-	if (this.vel.y == this.goal_y) {
+	//}
+	//if (this.vel.y == this.goal_y) {
 		this.vel.y = -this.vel.y;
-	}
+	//}
 }

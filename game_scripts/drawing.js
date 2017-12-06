@@ -17,6 +17,11 @@ function drawing(canvas) {
 	var wallMaterial = new THREE.MeshStandardMaterial( { color: 0x6666ff } );
 	var pelletMaterial = new THREE.MeshStandardMaterial( { color: 0xffff00 } );
 	var pacmanMaterial = new THREE.MeshStandardMaterial( { color: 0xcccc00, side: THREE.DoubleSide } );
+	var textMaterial = [
+		new THREE.MeshStandardMaterial( { color: 0xcccc00, emissive: 0x555500, side: THREE.BackSide} ),
+		new THREE.MeshStandardMaterial( { color: 0x00cc00, emissive: 0x005500, side: THREE.BackSide} ),
+		new THREE.MeshStandardMaterial( { color: 0xcc0000, emissive: 0x550000, side: THREE.BackSide} ),
+	];
 	var whiteMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
 	//Determines the colors of the ghosts.
 	//0 = Clyde (Orange), 1 = Blinky (Red), 2 = Pinky (Pink), 3 = Inky (Blue), 4 = Scared (Blue)
@@ -274,42 +279,56 @@ function drawing(canvas) {
 	
 	
 	this.text = "";
-	this.createText = function(text) {
+	this.createText = function(text, type) {
 		if (this.font == null) {
 		console.log("Not loaded")
 			return null;
 		}
 		
+		var textGroup = new THREE.Group();
+		
 		var textGeometry = new THREE.TextGeometry( text, {
 			font: this.font,
-			size: 80,
-			height: 5,
+			size: CAMERA_DISTANCE/10,
+			height: CAMERA_DISTANCE/25,
 			curveSegments: 1,
 			bevelEnabled: true,
-			bevelThickness: 10,
-			bevelSize: 8,
-			bevelSegments: 3
+			bevelThickness: CAMERA_DISTANCE/50,
+			bevelSize: CAMERA_DISTANCE/150,
+			bevelSegments: 2
 		} );
-		var textMesh = new THREE.Mesh( textGeometry, pacmanMaterial );
-		var textLight = new THREE.PointLight( pacmanMaterial.color, 3, TILE_SIZE*3 );
-		textLight.position.set(0,0,0);
+		var textMesh = new THREE.Mesh( textGeometry, textMaterial[type] );
+		var textLight = new THREE.PointLight( textMaterial[type].color, 3, CAMERA_DISTANCE );
+		textLight.position.set(0,0,TILE_SIZE*2);
 		textMesh.scale.y = -1;
-		textMesh.add(textLight);
-		scene.add( textMesh );
-		return textMesh;
+		
+		//Taken from http://jafty.com/blog/tag/three-js-rotate-text-by-center/
+		
+		textGeometry.computeBoundingBox();
+		var textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+
+		textMesh.position.set( -0.5 * textWidth, 0, 0 );//left-rt/high/far
+		
+		textGroup.add(textMesh);
+		textGroup.add(textLight);
+		textGroup.position.set(MAP_SIZE_X*TILE_SIZE/2, MAP_SIZE_Y*TILE_SIZE/2,0);
+		scene.add( textGroup );
+		return textGroup;
 	}
 	
 	this.textMesh = null;
 	
-	this.drawText = function(text, animationRotate, animationExit) {
-		if (this.textMesh == null || this.textMesh == undefined || (this.text !== text && text !== "")) {
-			this.textMesh = this.createText(text);
-		} else if (text === "") {
-			canvas.remove(this.textMesh);
+	this.drawText = function(text, type, animationRotate, animationExit) {
+		if ((this.text != text || text == "") && !(this.textMesh == null || this.textMesh == undefined)) {
+			console.log("poo: "+this.textMesh);
+			scene.remove(this.textMesh);
 			this.textMesh = null;
 		}
+		if ((this.textMesh == null || this.textMesh == undefined) && text != "") {
+			this.textMesh = this.createText(text, type);
+		}
 		if (this.textMesh != null) {
-			this.textMesh.position.z = animationExit;
+			this.textMesh.position.z = -animationExit*CAMERA_DISTANCE-TILE_SIZE*1;
 			this.textMesh.rotation.set(animationExit*Math.PI/2, animationRotate*Math.PI*2, 0);
 		}
 		this.text = text;
